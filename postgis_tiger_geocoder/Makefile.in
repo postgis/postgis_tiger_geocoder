@@ -1,4 +1,4 @@
-include @srcdir@/../upgradeable_versions.mk
+include ../upgradeable_versions.mk
 
 POSTGIS_PGSQL_VERSION=@POSTGIS_PGSQL_VERSION@
 EXTENSION    = postgis_tiger_geocoder
