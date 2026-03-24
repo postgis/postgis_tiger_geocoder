@@ -3,6 +3,8 @@
 postgis_tiger_geocoder PostgreSQL extension used to be part of the postgis project base.
 It was removed from PostGIS 3.7 on, and this is its new home.
 
+PostgreSQL 16 or higher is required.
+
 
 ## Building the extension
 ```sh
@@ -33,7 +35,7 @@ exist.
     if you have a fast network connection to the server. This folder is
     where the tiger files will be downloaded to.
 
-    Note you may customize the location of this 
+    Note you may customize the location of this
     folder by editing `tiger.loader_variables.staging_fold` table column
 
 2. Create a folder called temp in the gisdata folder.
@@ -50,15 +52,15 @@ exist.
     WHITESPACE AND POSSIBLY NON-SCRIPT CHARACTERS THAT CAUSE IT TO BREAK.)
 
     ### UNIX /LINUX USERS
-    Note even if you want just specific states you need to 
+    Note even if you want just specific states you need to
     do this step since county, state tables are available only at national level
 
     ```sql
-    SELECT loader_generate_nation_script('sh');  
+    SELECT loader_generate_nation_script('sh');
     ```
 
-    After the nation load, generate a bash script suitable for Unix command lines 
-    for your desired states. 
+    After the nation load, generate a bash script suitable for Unix command lines
+    for your desired states.
 
     ```sql
     SELECT loader_generate_script(ARRAY['DC','RI'], 'sh');
@@ -69,9 +71,9 @@ exist.
     THIS SETTING WILL MAKE IT STOP ON ERROR OR UNINITIALIZED VARIABLE AND
     MAKE IT EASIER TO DEBUG ANY PROBLEMS.
 
-    THEN RUN THE SCRIPT AT THE COMMAND LINE, REDIRECTING STANDARD OUTPUT AND 
-    STANDARD ERROR TO USEFUL FILES.  YOU MAY WANT TO RUN `tail -f ` TO SEE THE 
-    STANDARD ERROR AS IT GETS WRITTEN.  FOR EXAMPLE: 
+    THEN RUN THE SCRIPT AT THE COMMAND LINE, REDIRECTING STANDARD OUTPUT AND
+    STANDARD ERROR TO USEFUL FILES.  YOU MAY WANT TO RUN `tail -f ` TO SEE THE
+    STANDARD ERROR AS IT GETS WRITTEN.  FOR EXAMPLE:
 
     ```sh
     sh foo.sh 1>out 2>err; tail -f err
@@ -85,11 +87,11 @@ exist.
 
     To generate a WINDOWS DOS script
     this will generate the script to download the national layers
-    Note even if you want just specific states you need to 
+    Note even if you want just specific states you need to
     do this step since 2011 county, state tables are available only at national level
 
     ```sql
-    SELECT loader_generate_nation_script('windows');  
+    SELECT loader_generate_nation_script('windows');
     ```
 
     This you do after the nation load and for states you want:
@@ -98,10 +100,10 @@ exist.
     SELECT loader_generate_script(ARRAY['DC','RI'], 'windows');
     ```
 
-    If your script disappears without loading anything, 
-    most likely one of your path settings is wrong. 
-    To troubleshoot run the batch script by 
-    first opening up a commandline and executing the file. 
+    If your script disappears without loading anything,
+    most likely one of your path settings is wrong.
+    To troubleshoot run the batch script by
+    first opening up a commandline and executing the file.
 
     That will keep the window open for you to see the error.
 
@@ -126,17 +128,17 @@ exist.
     this is generally faster
 
     ```sql
-    SELECT g.rating, 
-        ST_X(geomout) As lon, 
-        ST_Y(geomout) As lat, (addy).* 
+    SELECT g.rating,
+        ST_X(geomout) As lon,
+        ST_Y(geomout) As lat, (addy).*
     FROM geocode('1731 New Hampshire Avenue Northwest, Washington, DC 20010', 1) As g;
     ```
 
     To get multiple answers if there is more than 1:
 
     ```sql
-    SELECT g.rating, 
-        ST_X(geomout) As lon, 
-        ST_Y(geomout) As lat, (addy).* 
+    SELECT g.rating,
+        ST_X(geomout) As lon,
+        ST_Y(geomout) As lat, (addy).*
     FROM geocode('1731 New Hampshire Avenue Northwest, Washington, DC 20010') As g;
     ```

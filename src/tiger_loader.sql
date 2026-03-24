@@ -2,7 +2,7 @@
 -- PostGIS - Spatial Types for PostgreSQL
 -- http://postgis.net
 --
--- Copyright (C) 2012-2024 Regina Obe and Leo Hsu
+-- Copyright (C) 2012-2026 Regina Obe and Leo Hsu
 -- Paragon Corporation
 --
 -- This is free software; you can redistribute and/or modify it under
@@ -11,161 +11,8 @@
 -- Author: Regina Obe and Leo Hsu <lr@pcorp.us>
 --
 -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-SELECT tiger.SetSearchPathForInstall('tiger');
-BEGIN;
-CREATE OR REPLACE FUNCTION create_census_base_tables()
-	RETURNS text AS
-$$
-DECLARE var_temp text;
-BEGIN
-var_temp := tiger.SetSearchPathForInstall('tiger');
-IF NOT EXISTS(SELECT table_name FROM information_schema.columns WHERE table_schema = 'tiger' AND column_name = 'tract_id' AND table_name = 'tract')  THEN
-	-- census block group/tracts parent tables not created yet or an older version -- drop old if not in use, create new structure
-	DROP TABLE IF EXISTS tiger.tract;
-	CREATE TABLE tiger.tract
-	(
-	  gid serial NOT NULL,
-	  statefp varchar(2),
-	  countyfp varchar(3),
-	  tractce varchar(6),
-	  tract_id varchar(11) PRIMARY KEY,
-	  name varchar(7),
-	  namelsad varchar(20),
-	  mtfcc varchar(5),
-	  funcstat varchar(1),
-	  aland double precision,
-	  awater double precision,
-	  intptlat varchar(11),
-	  intptlon varchar(12),
-	  the_geom geometry,
-	  CONSTRAINT enforce_dims_geom CHECK (st_ndims(the_geom) = 2),
-	  CONSTRAINT enforce_geotype_geom CHECK (geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL),
-	  CONSTRAINT enforce_srid_geom CHECK (st_srid(the_geom) = 4269)
-	);
-
-	DROP TABLE IF EXISTS tiger.tabblock;
-	CREATE TABLE tiger.tabblock
-	(
-	  gid serial NOT NULL,
-	  statefp varchar(2),
-	  countyfp varchar(3),
-	  tractce varchar(6),
-	  blockce varchar(4),
-	  tabblock_id varchar(16) PRIMARY KEY,
-	  name varchar(20),
-	  mtfcc varchar(5),
-	  ur varchar(1),
-	  uace varchar(5),
-	  funcstat varchar(1),
-	  aland double precision,
-	  awater double precision,
-	  intptlat varchar(11),
-	  intptlon varchar(12),
-	  the_geom geometry,
-	  CONSTRAINT enforce_dims_geom CHECK (st_ndims(the_geom) = 2),
-	  CONSTRAINT enforce_geotype_geom CHECK (geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL),
-	  CONSTRAINT enforce_srid_geom CHECK (st_srid(the_geom) = 4269)
-	);
-
-	DROP TABLE IF EXISTS tiger.bg;
-	CREATE TABLE tiger.bg
-	(
-	  gid serial NOT NULL,
-	  statefp varchar(2),
-	  countyfp varchar(3),
-	  tractce varchar(6),
-	  blkgrpce varchar(1),
-	  bg_id varchar(12) PRIMARY KEY,
-	  namelsad varchar(13),
-	  mtfcc varchar(5),
-	  funcstat varchar(1),
-	  aland double precision,
-	  awater double precision,
-	  intptlat varchar(11),
-	  intptlon varchar(12),
-	  the_geom geometry,
-	  CONSTRAINT enforce_dims_geom CHECK (st_ndims(the_geom) = 2),
-	  CONSTRAINT enforce_geotype_geom CHECK (geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL),
-	  CONSTRAINT enforce_srid_geom CHECK (st_srid(the_geom) = 4269)
-	);
-	COMMENT ON TABLE tiger.bg IS 'block groups';
-ELSE
-	-- Insist on invoking Postgres logic of owning table by extension. This prevent attacks like CVE-2022-2625.
-	CREATE TABLE IF NOT EXISTS tiger.tract
-	(
-	  gid serial NOT NULL,
-	  statefp varchar(2),
-	  countyfp varchar(3),
-	  tractce varchar(6),
-	  tract_id varchar(11) PRIMARY KEY,
-	  name varchar(7),
-	  namelsad varchar(20),
-	  mtfcc varchar(5),
-	  funcstat varchar(1),
-	  aland double precision,
-	  awater double precision,
-	  intptlat varchar(11),
-	  intptlon varchar(12),
-	  the_geom geometry,
-	  CONSTRAINT enforce_dims_geom CHECK (st_ndims(the_geom) = 2),
-	  CONSTRAINT enforce_geotype_geom CHECK (geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL),
-	  CONSTRAINT enforce_srid_geom CHECK (st_srid(the_geom) = 4269)
-	);
-
-	CREATE TABLE IF NOT EXISTS tiger.tabblock
-	(
-	  gid serial NOT NULL,
-	  statefp varchar(2),
-	  countyfp varchar(3),
-	  tractce varchar(6),
-	  blockce varchar(4),
-	  tabblock_id varchar(16) PRIMARY KEY,
-	  name varchar(20),
-	  mtfcc varchar(5),
-	  ur varchar(1),
-	  uace varchar(5),
-	  funcstat varchar(1),
-	  aland double precision,
-	  awater double precision,
-	  intptlat varchar(11),
-	  intptlon varchar(12),
-	  the_geom geometry,
-	  CONSTRAINT enforce_dims_geom CHECK (st_ndims(the_geom) = 2),
-	  CONSTRAINT enforce_geotype_geom CHECK (geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL),
-	  CONSTRAINT enforce_srid_geom CHECK (st_srid(the_geom) = 4269)
-	);
-
-	CREATE TABLE IF NOT EXISTS tiger.bg
-	(
-	  gid serial NOT NULL,
-	  statefp varchar(2),
-	  countyfp varchar(3),
-	  tractce varchar(6),
-	  blkgrpce varchar(1),
-	  bg_id varchar(12) PRIMARY KEY,
-	  namelsad varchar(13),
-	  mtfcc varchar(5),
-	  funcstat varchar(1),
-	  aland double precision,
-	  awater double precision,
-	  intptlat varchar(11),
-	  intptlon varchar(12),
-	  the_geom geometry,
-	  CONSTRAINT enforce_dims_geom CHECK (st_ndims(the_geom) = 2),
-	  CONSTRAINT enforce_geotype_geom CHECK (geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL),
-	  CONSTRAINT enforce_srid_geom CHECK (st_srid(the_geom) = 4269)
-	);
-END IF;
-
-IF EXISTS(SELECT * FROM information_schema.columns WHERE table_schema = 'tiger' AND column_name = 'tabblock_id' AND table_name = 'tabblock' AND character_maximum_length < 16)  THEN -- size of name and tabblock_id fields need to be increased
-    ALTER TABLE tiger.tabblock ALTER COLUMN name TYPE varchar(20);
-    ALTER TABLE tiger.tabblock ALTER COLUMN tabblock_id TYPE varchar(16);
-    RAISE NOTICE 'Size of tabblock_id and name are being increased';
-END IF;
-RETURN 'Tables already present';
-END
-$$
-language 'plpgsql';
+-- SELECT tiger.SetSearchPathForInstall('tiger');
+DROP FUNCTION IF EXISTS create_census_base_tables();
 
 CREATE OR REPLACE FUNCTION loader_macro_replace(param_input text, param_keys text[],param_values text[])
 RETURNS text AS
@@ -181,6 +28,7 @@ $$
 $$
   LANGUAGE 'plpgsql' IMMUTABLE
   COST 100;
+
 
 CREATE TABLE IF NOT EXISTS tiger.tabblock20
 (
@@ -662,6 +510,3 @@ AND platform.os = $2  -- generate script for selected platform
 ;
 $$
   LANGUAGE sql VOLATILE;
-
-SELECT create_census_base_tables();
-COMMIT;

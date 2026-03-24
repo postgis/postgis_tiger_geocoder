@@ -1,0 +1,3 @@
+\t on \a \set ECHO none
+SELECT tiger.SetSearchPathForInstall('tiger');
+

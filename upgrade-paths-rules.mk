@@ -4,7 +4,6 @@ TAG_UPGRADE=$(EXTENSION)--TEMPLATED--TO--ANY.sql
 
 PG_SHAREDIR=$(shell $(PG_CONFIG) --sharedir)
 
-POSTGIS_BUILD_DATE=$(shell date $${SOURCE_DATE_EPOCH:+-d @$$SOURCE_DATE_EPOCH} -u "+%Y-%m-%d %H:%M:%S")
 
 install: install-upgrade-paths
 
@@ -21,11 +20,20 @@ install: install-upgrade-paths
 #
 # See https://trac.osgeo.org/postgis/ticket/5092
 #
-install-upgrade-paths: sql/$(TAG_UPGRADE) sql/$(EXTENSION)--ANY--$(EXTVERSION).sql
+install-upgrade-paths: sql/$(TAG_UPGRADE) data/$(EXTENSION)--ANY--$(EXTVERSION).sql
 	mkdir -p "$(EXTDIR)"
-	$(INSTALL_DATA) "sql/$(EXTENSION)--ANY--$(EXTVERSION).sql" "$(EXTDIR)/$(EXTENSION)--ANY--$(EXTVERSION).sql"
+	$(INSTALL_DATA) "data/$(EXTENSION)--ANY--$(EXTVERSION).sql" "$(EXTDIR)/$(EXTENSION)--ANY--$(EXTVERSION).sql"
 	$(INSTALL_DATA) "sql/$(TAG_UPGRADE)" "$(EXTDIR)/$(TAG_UPGRADE)"
-	ln -fs "$(TAG_UPGRADE)" "$(EXTDIR)/$(EXTENSION)--$(EXTVERSION)--ANY.sql"
+	cp "sql/$(TAG_UPGRADE)" "$(EXTDIR)/$(EXTENSION)--$(EXTVERSION)--ANY.sql"
+	cp "sql/$(TAG_UPGRADE)" "data/$(EXTENSION)--$(EXTVERSION)--ANY.sql"
+
+.PHONY: upgrade $(UPGRADEABLE_VERSIONS)
+
+upgrade: $(UPGRADEABLE_VERSIONS)
+
+# A single recipe, but it runs once per element in the list
+$(UPGRADEABLE_VERSIONS):
+	cp "sql/$(TAG_UPGRADE)" "data/$(EXTENSION)--$@--ANY.sql"
 
 install-extension-upgrades-from-known-versions:
 	$(PERL) $(top_srcdir)/loader/postgis.pl \

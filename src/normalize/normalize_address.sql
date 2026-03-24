@@ -55,8 +55,8 @@ CREATE OR REPLACE FUNCTION normalize_address(in_rawinput character varying)
   RETURNS norm_addy AS
 $$
 DECLARE
-  debug_flag boolean := get_geocode_setting('debug_normalize_address')::boolean;
-  use_pagc boolean := COALESCE(get_geocode_setting('use_pagc_address_parser')::boolean, false);
+  debug_flag boolean := tiger.get_geocode_setting('debug_normalize_address')::boolean;
+  use_pagc boolean := COALESCE(tiger.get_geocode_setting('use_pagc_address_parser')::boolean, false);
   result norm_addy;
   addressString VARCHAR;
   zipString VARCHAR;
@@ -77,7 +77,7 @@ DECLARE
 BEGIN
   result.parsed := FALSE;
   IF use_pagc THEN
-  	result := pagc_normalize_address(in_rawinput);
+  	result := tiger.pagc_normalize_address(in_rawinput);
   	RETURN result;
   END IF;
 
@@ -228,7 +228,7 @@ BEGIN
     IF debug_flag THEN
       raise notice '% start location extract', clock_timestamp();
     END IF;
-    result.location := location_extract(fullStreet, result.stateAbbrev);
+    result.location := tiger.location_extract(fullStreet, result.stateAbbrev);
 
     IF debug_flag THEN
       raise notice '% end location extract', clock_timestamp();

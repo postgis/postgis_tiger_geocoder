@@ -11,31 +11,28 @@
 --
 -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 --
-SELECT tiger.SetSearchPathForInstall('tiger');
-
-CREATE OR REPLACE FUNCTION install_geocode_settings()
+CREATE OR REPLACE FUNCTION tiger.install_geocode_settings()
 	RETURNS void AS
 $$
 DECLARE var_temp text;
 BEGIN
-	var_temp := tiger.SetSearchPathForInstall('tiger'); /** set set search path to have tiger in front **/
 	IF NOT EXISTS(SELECT table_name FROM information_schema.columns WHERE table_schema = 'tiger' AND table_name = 'geocode_settings')  THEN
-		CREATE TABLE geocode_settings(name text primary key, setting text, unit text, category text, short_desc text);
+		CREATE TABLE tiger.geocode_settings(name text primary key, setting text, unit text, category text, short_desc text);
 		GRANT SELECT ON geocode_settings TO public;
 	ELSE
 		-- Insist on invoking Postgres logic of owning table by extension. This prevent attacks like CVE-2022-2625.
 		CREATE TABLE IF NOT EXISTS geocode_settings(name text primary key, setting text, unit text, category text, short_desc text);
 	END IF;
 	IF NOT EXISTS(SELECT table_name FROM information_schema.columns WHERE table_schema = 'tiger' AND table_name = 'geocode_settings_default')  THEN
-		CREATE TABLE geocode_settings_default(name text primary key, setting text, unit text, category text, short_desc text);
-		GRANT SELECT ON geocode_settings_default TO public;
+		CREATE TABLE IF NOT EXISTS tiger.geocode_settings_default(name text primary key, setting text, unit text, category text, short_desc text);
+		GRANT SELECT ON tiger.geocode_settings_default TO public;
 	ELSE
 		-- Same as above.
 		CREATE TABLE IF NOT EXISTS geocode_settings_default(name text primary key, setting text, unit text, category text, short_desc text);
 	END IF;
 	--recreate defaults
-	TRUNCATE TABLE geocode_settings_default;
-	INSERT INTO geocode_settings_default(name,setting,unit,category,short_desc)
+	TRUNCATE TABLE tiger.geocode_settings_default;
+	INSERT INTO tiger.geocode_settings_default(name,setting,unit,category,short_desc)
 		SELECT f.*
 		FROM
 		(VALUES ('debug_geocode_address', 'false', 'boolean','debug', 'outputs debug information in notice log such as queries when geocode_addresss is called if true')
@@ -48,12 +45,12 @@ BEGIN
 		) f(name,setting,unit,category,short_desc);
 
 	-- delete entries that are the same as default values
-	DELETE FROM geocode_settings As gc USING geocode_settings_default As gf WHERE gf.name = gc.name AND gf.setting = gc.setting;
+	DELETE FROM tiger.geocode_settings As gc USING tiger.geocode_settings_default As gf WHERE gf.name = gc.name AND gf.setting = gc.setting;
 END;
 $$
 language plpgsql;
 
-SELECT install_geocode_settings(); /** create the table if it doesn't exist **/
+SELECT tiger.install_geocode_settings(); /** create the table if it doesn't exist **/
 
 CREATE OR REPLACE FUNCTION get_geocode_setting(setting_name text)
 RETURNS text AS
