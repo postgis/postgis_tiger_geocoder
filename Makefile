@@ -24,6 +24,9 @@ PREREL_PREFIX = $(shell echo $(EXTVERSION) | \
 DATA_built = \
 	data/$(EXTENSION).sql \
 	data/$(EXTENSION)--$(EXTVERSION).sql \
+	data/$(EXTENSION)--$(EXTVERSION)--ANY.sql \
+	data/$(EXTENSION)--ANY--$(EXTVERSION).sql \
+	$(UPGRADEABLE_VERSIONS:%=data/$(EXTENSION)--%--ANY.sql) \
 	$(NULL)
 
 REGRESS = test-normalize_address test-geocode_intersection_spacing test-upgrade
@@ -39,7 +42,7 @@ REGRESS += test-pagc_normalize_address
 REGRESS_OPTS += --load-extension=address_standardizer
 endif
 
-all: sql/$(TAG_UPGRADE) sql/$(EXTENSION)_pre.sql data/$(EXTENSION)--$(EXTVERSION).sql data/$(EXTENSION)--ANY--$(EXTVERSION).sql $(UPGRADEABLE_VERSIONS) sql/test-normalize_address.sql sql/test-geocode_intersection_spacing.sql sql/test-pagc_normalize_address.sql expected/test-normalize_address.out expected/test-geocode_intersection_spacing.out expected/test-pagc_normalize_address.out sql/test-upgrade.sql expected/test-upgrade.out
+all: sql/$(TAG_UPGRADE) sql/$(EXTENSION)_pre.sql data/$(EXTENSION)--$(EXTVERSION).sql data/$(EXTENSION)--$(EXTVERSION)--ANY.sql data/$(EXTENSION)--ANY--$(EXTVERSION).sql $(UPGRADEABLE_VERSIONS) sql/test-normalize_address.sql sql/test-geocode_intersection_spacing.sql sql/test-pagc_normalize_address.sql expected/test-normalize_address.out expected/test-geocode_intersection_spacing.out expected/test-pagc_normalize_address.out sql/test-upgrade.sql expected/test-upgrade.out
 
 
 .PHONY: expected
@@ -53,6 +56,9 @@ data:
 	mkdir -p $@
 
 data/$(EXTENSION)--$(EXTVERSION).sql: data/$(EXTENSION).sql | data
+	cp $< $@
+
+data/$(EXTENSION)--$(EXTVERSION)--ANY.sql: sql/$(TAG_UPGRADE) | data
 	cp $< $@
 
 expected/test-normalize_address.out: sql_bits/test_tuples_only_unaligned.sql.expected.in src/regress/normalize_address_regress | expected
@@ -175,7 +181,7 @@ sql/tiger_geocoder.sql: sql_bits/norm_addy_create.sql.in \
 upgrade: $(UPGRADEABLE_VERSIONS)
 
 # A single recipe, but it runs once per element in the list
-$(UPGRADEABLE_VERSIONS):
+$(UPGRADEABLE_VERSIONS): sql/$(TAG_UPGRADE)
 	cp "sql/$(TAG_UPGRADE)" "data/$(EXTENSION)--$@--ANY.sql"
 
 #only extension files

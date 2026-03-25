@@ -102,7 +102,6 @@ SELECT '#1614b' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_
 
 --internal address prefix sometimes get caught in post dir
 SELECT '#1108a' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('529 Main Street, Suite 201, Boston, MA 02129') AS addy;
-SELECT '#1108a' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('529 Main Street, Suite 201, Boston, MA 02129') AS addy;
 
 -- direct helper coverage for SQL wrappers
 SELECT '#sqlify1' As ticket, tiger.end_soundex('123 Main Street'), tiger.end_soundex('Street'), tiger.end_soundex(NULL::varchar);
