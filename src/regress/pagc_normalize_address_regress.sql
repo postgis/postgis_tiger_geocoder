@@ -7,6 +7,11 @@ SELECT '#1051a' As ticket, * FROM normalize_address('212 3rd Ave N Suite 560, Mi
 SELECT '#1051b' As ticket, * FROM normalize_address('3937 43RD AVE S, MINNEAPOLIS, MN 55406');
 -- this currently turns 3rd to 3, we want to fix to keep 3rd as is
 SELECT '#1051c' As ticket, * FROM normalize_address('212 N 3rd Ave, Minneapolis, MN 55401');
+SELECT '#1599' As ticket, * FROM normalize_address('212 n 3rd ave, Minneapolis, mn 55401, USA');
+SELECT '#1599b' As ticket, * FROM normalize_address('212 n 3rd ave, Minneapolis, mn 55401, France');
+SELECT '#1599c' As ticket, * FROM normalize_address('26 Court Street, Boston, Massachusetts 02109, France');
+SELECT '#1599d' As ticket, * FROM normalize_address('529 Main Street, Boston, MA 021, France');
+SELECT '#1599e' As ticket, * FROM normalize_address('26 Court Street, Boston, Massachusetts 02109, FR');
 -- this currently turns 3rd to 3, we want to fix to keep 3rd as is
 SELECT '#1051d' As ticket, * FROM normalize_address('212 3rd Ave N Minneapolis, MN 55401');
 -- comma in wrong spot
@@ -107,6 +112,10 @@ SELECT '#2981' As ticket, * FROM normalize_address('1566 NEW STATE HWY, RAYNHAM,
 SELECT '#2978a' As ticket, * FROM normalize_address('10-20 DORRANCE ST PROVIDENCE RI' ) ;
 SELECT '#2978b' As ticket, * FROM normalize_address('10 20 DORRANCE ST PROVIDENCE RI' ) ;
 SELECT '#2978c' As ticket, * FROM normalize_address('10-20 DORRANCE ST, PROVIDENCE. RI' ) ;
+SELECT '#2459' As ticket, * FROM normalize_address(E'1000 S. Fremont Ave.,\nBldg. A-11,\nAlhambra, CA 91803');
+SELECT '#2459zipa' As ticket, * FROM normalize_address('02109');
+SELECT '#2459zipb' As ticket, * FROM normalize_address('02109-1234');
+SELECT '#2459zipc' As ticket, * FROM normalize_address('Minneapolis, MN 55401');
 
 --\timing
 SELECT set_geocode_setting('use_pagc_address_parser', 'false');

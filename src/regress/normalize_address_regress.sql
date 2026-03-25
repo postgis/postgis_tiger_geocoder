@@ -3,6 +3,11 @@ SELECT '#887' As ticket, * FROM tiger.normalize_address('2450 N COLORADO ST, PHI
 SELECT '#1051a' As ticket, * FROM tiger.normalize_address('212 3rd Ave N Suite 560, Minneapolis, MN 55401');
 SELECT '#1051b' As ticket, * FROM tiger.normalize_address('3937 43RD AVE S, MINNEAPOLIS, MN 55406');
 SELECT '#1051c' As ticket, * FROM tiger.normalize_address('212 N 3rd Ave, Minneapolis, MN 55401');
+SELECT '#1599' As ticket, * FROM tiger.normalize_address('212 n 3rd ave, Minneapolis, mn 55401, USA');
+SELECT '#1599b' As ticket, * FROM tiger.normalize_address('212 n 3rd ave, Minneapolis, mn 55401, France');
+SELECT '#1599c' As ticket, * FROM tiger.normalize_address('26 Court Street, Boston, Massachusetts 02109, France');
+SELECT '#1599d' As ticket, * FROM tiger.normalize_address('529 Main Street, Boston, MA 021, France');
+SELECT '#1599e' As ticket, * FROM tiger.normalize_address('26 Court Street, Boston, Massachusetts 02109, FR');
 -- City missing ,  -- NOTE this one won't normalize right if you don't have MN data loaded
 SELECT '#1051d' As ticket, * FROM tiger.normalize_address('212 3rd Ave N Minneapolis, MN 55401');
 -- comma in wrong spot
@@ -86,6 +91,7 @@ SELECT '#1125d' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_
 SELECT '#1125e' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('I-90,Boston, MA') As addy;
 --broke this one too
 SELECT '#1125f' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('I 90,Boston, MA') As addy;
+SELECT '#1599g' As ticket, tiger.pprint_addy(ROW(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,true,NULL,NULL,'US')::tiger.norm_addy);
 
 -- location with prefixes getting caught in post prefix
 SELECT '#1310a' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('1110 W CAPITOL AVE, WEST SACRAMENTO, CA') As addy;
@@ -96,4 +102,40 @@ SELECT '#1614b' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_
 
 --internal address prefix sometimes get caught in post dir
 SELECT '#1108a' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('529 Main Street, Suite 201, Boston, MA 02129') AS addy;
+SELECT '#1108a' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('529 Main Street, Suite 201, Boston, MA 02129') AS addy;
+
+-- direct helper coverage for SQL wrappers
+SELECT '#sqlify1' As ticket, tiger.end_soundex('123 Main Street'), tiger.end_soundex('Street'), tiger.end_soundex(NULL::varchar);
+SELECT '#sqlify2' As ticket, tiger.nullable_levenshtein(NULL::varchar, 'foo'), tiger.nullable_levenshtein('foo', NULL::varchar), tiger.nullable_levenshtein('foo', ''), tiger.nullable_levenshtein('foo', 'food');
+SELECT '#sqlify3' As ticket, tiger.rate_attributes('N','N','MAIN','MAIN','ST','ST',NULL,NULL,'BOSTON','BOSTON',NULL), tiger.rate_attributes('N','N','MAIN','MAIN','ST','ST',NULL,NULL,NULL,'BOSTON',NULL);
+SELECT '#sqlify4' As ticket, tiger.location_extract_place_exact('999 Main Street, Boston', 'MA');
+SELECT '#sqlify5' As ticket, count(*) FROM tiger.geocode(NULL::varchar, 1) AS g;
+SELECT '#sqlify6' As ticket, strpos(
+  pg_get_functiondef(to_regprocedure((SELECT n.nspname || '.nullable_levenshtein(character varying,character varying)' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder'))),
+  (SELECT n.nspname || '.levenshtein_ignore_case' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder')
+) > 0;
+SELECT '#sqlify7' As ticket, CASE
+  WHEN current_setting('server_version_num')::integer >= 160000 THEN strpos(
+    pg_get_functiondef(to_regprocedure((SELECT n.nspname || '.end_soundex(character varying)' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder'))),
+    (SELECT n.nspname || '.soundex' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'fuzzystrmatch')
+  ) > 0
+  ELSE strpos(
+    pg_get_functiondef(to_regprocedure((SELECT n.nspname || '.end_soundex(character varying)' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder'))),
+    'soundex('
+  ) > 0
+END;
+SELECT '#sqlify8' As ticket, strpos(
+  pg_get_functiondef(to_regprocedure((SELECT n.nspname || '.geocode(character varying,integer,geometry)' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder'))),
+  (SELECT n.nspname || '.normalize_address' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder')
+) > 0, strpos(
+  pg_get_functiondef(to_regprocedure((SELECT n.nspname || '.geocode(character varying,integer,geometry)' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder'))),
+  (SELECT n.nspname || '.geocode(addy, max_results, restrict_geom)' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder')
+) > 0;
+SELECT '#sqlify9' As ticket, strpos(
+  pg_get_functiondef(to_regprocedure((SELECT n.nspname || '.rate_attributes(character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying)' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder'))),
+  (SELECT n.nspname || '.levenshtein_ignore_case' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder')
+) > 0, strpos(
+  pg_get_functiondef(to_regprocedure((SELECT n.nspname || '.rate_attributes(character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying)' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder'))),
+  (SELECT n.nspname || '.rate_attributes(' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder')
+) > 0;
 --\timing

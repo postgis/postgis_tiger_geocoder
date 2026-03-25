@@ -1,12 +1,41 @@
 # TIGER GEOCODER
 
 postgis_tiger_geocoder PostgreSQL extension used to be part of the postgis project base.
-It was removed from PostGIS 3.7 on, and this is its new home.
+Project history notes, including the standalone split from PostGIS and recent
+standalone changes, live in [NEWS.md](NEWS.md).
 
 PostgreSQL 16 or higher is required.
 
 
 ## Building the extension
+```sh
+make
+make -j check
+```
+
+`make check` builds the extension, installs it into a temporary location,
+starts a temporary PostgreSQL cluster, runs the regressions, and removes the
+scratch files afterward. This self-contained flow requires PostgreSQL 16 or
+newer because it uses `extension_control_path`.
+
+If a sibling checkout exists at `../address_standardizer`, `make check`
+automatically includes the PAGC normalization regressions as part of the full
+suite. You can force or disable that behavior explicitly:
+
+```sh
+WITH_ADDRESS_STANDARDIZER=1 ADDRESS_STANDARDIZER_SOURCE=/path/to/address_standardizer make check
+WITH_ADDRESS_STANDARDIZER=0 make check
+```
+
+To keep the temporary install tree and cluster around for debugging:
+
+```sh
+KEEP_CHECK_ARTIFACTS=1 make check
+```
+
+For older PostgreSQL versions, use the installed-extension flow against an
+existing server:
+
 ```sh
 make
 make installcheck

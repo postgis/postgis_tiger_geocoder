@@ -5,7 +5,6 @@ MINORVERSION  = 2025.1
 GREP = grep
 PERL = perl
 PG_CONFIG = pg_config
-
 MICRO_NUMBER  = $(shell echo $(EXTVERSION) | \
 						$(PERL) -pe 's/\d.\d.(\d+)[a-zA-Z]*\d*/$1/'
 
@@ -27,14 +26,20 @@ DATA_built = \
 	data/$(EXTENSION)--$(EXTVERSION).sql \
 	$(NULL)
 
-REGRESS = test-normalize_address test-upgrade
+REGRESS = test-normalize_address test-geocode_intersection_spacing test-upgrade
 REGRESS_OPTS = --load-extension=fuzzystrmatch --load-extension=postgis --load-extension=$(EXTENSION)
 TAG_UPGRADE=$(EXTENSION)--TEMPLATED--TO--ANY.sql
 
 SQL_BITS     = $(wildcard sql_bits/*.sql)
 EXTRA_CLEAN = ${SQL} expected
+ADDRESS_STANDARDIZER ?=
 
-all: sql/$(TAG_UPGRADE) sql/$(EXTENSION)_pre.sql data/$(EXTENSION)--$(EXTVERSION).sql data/$(EXTENSION)--ANY--$(EXTVERSION).sql $(UPGRADEABLE_VERSIONS) sql/test-normalize_address.sql sql/test-pagc_normalize_address.sql expected/test-normalize_address.out expected/test-pagc_normalize_address.out sql/test-upgrade.sql expected/test-upgrade.out
+ifeq ($(ADDRESS_STANDARDIZER),address_standardizer)
+REGRESS += test-pagc_normalize_address
+REGRESS_OPTS += --load-extension=address_standardizer
+endif
+
+all: sql/$(TAG_UPGRADE) sql/$(EXTENSION)_pre.sql data/$(EXTENSION)--$(EXTVERSION).sql data/$(EXTENSION)--ANY--$(EXTVERSION).sql $(UPGRADEABLE_VERSIONS) sql/test-normalize_address.sql sql/test-geocode_intersection_spacing.sql sql/test-pagc_normalize_address.sql expected/test-normalize_address.out expected/test-geocode_intersection_spacing.out expected/test-pagc_normalize_address.out sql/test-upgrade.sql expected/test-upgrade.out
 
 
 .PHONY: expected
@@ -53,11 +58,17 @@ data/$(EXTENSION)--$(EXTVERSION).sql: data/$(EXTENSION).sql | data
 expected/test-normalize_address.out: sql_bits/test_tuples_only_unaligned.sql.expected.in src/regress/normalize_address_regress | expected
 	cat $^ > $@
 
+expected/test-geocode_intersection_spacing.out: sql_bits/test_tuples_only_unaligned.sql.expected.in sql_bits/test-geocode_intersection_spacing.out.in | expected
+	cat $^ > $@
+
 expected/test-pagc_normalize_address.out: sql_bits/test_tuples_only_unaligned.sql.expected.in src/regress/pagc_normalize_address_regress | expected
 	cat $^ > $@
 
 ## adding \t .. to force output to be the same as what get in regular regress in tiger folder
 sql/test-normalize_address.sql: sql_bits/test_tuples_only_unaligned.sql.in src/regress/normalize_address_regress.sql | sql
+	cat $^ > $@
+
+sql/test-geocode_intersection_spacing.sql: sql_bits/test_tuples_only_unaligned.sql.in sql_bits/test-geocode_intersection_spacing.sql.in | sql
 	cat $^ > $@
 
 sql/test-upgrade.sql: | sql
