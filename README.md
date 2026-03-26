@@ -43,10 +43,19 @@ make installcheck
 
 ## Installing the extension
 
-This is a trusted PostgreSQL extension, meaning a non-superuser can do:
+This is a trusted PostgreSQL extension, meaning a non-superuser can do
+below.  Note it does assume non-trusted extensions postgis are already installed
+if a non-super user is installing:
 
 ```sql
-CREATE EXTENSION postgis_tiger_geocoder;
+CREATE EXTENSION postgis_tiger_geocoder CASCADE;
+```
+
+After install, make sure to add tiger to your database search_path e.g.
+Replace *mydb* with the name of your database.
+
+```sql
+ALTER DATABASE mydb SET search_path="$user",public,tiger;
 ```
 
 ## Loading data
