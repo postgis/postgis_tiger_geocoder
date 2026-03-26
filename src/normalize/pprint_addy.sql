@@ -39,10 +39,6 @@ BEGIN
 
   result := trim(result);
 
-  IF result <> '' AND input.country IS NOT NULL THEN
-    result := result || ', ' || input.country;
-  END IF;
-
   RETURN result;
 
 END;

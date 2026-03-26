@@ -10,5 +10,4 @@ CREATE TYPE norm_addy AS (
     zip VARCHAR,
     parsed BOOLEAN,
     zip4 varchar(4),
-    address_alphanumeric varchar,
-    country varchar(2));
+    address_alphanumeric varchar);

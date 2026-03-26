@@ -46,8 +46,7 @@ BEGIN
       COALESCE(NULLIF(split_part(COALESCE(sa.postcode, ''), '-', 1), ''), NULLIF(parsed.zip, '')),
       TRUE,
       COALESCE(NULLIF(split_part(COALESCE(sa.postcode, ''), '-', 2), ''), NULLIF(parsed.zipplus, '')),
-      NULLIF(sa.house_num, ''),
-      COALESCE(NULLIF(trim(sa.country), ''), NULLIF(trim(parsed.country), ''), 'US')
+      NULLIF(sa.house_num, '')
   )::norm_addy;
 END
 $$
