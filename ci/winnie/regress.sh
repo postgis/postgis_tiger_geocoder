@@ -2,9 +2,11 @@
 
 . $(dirname $0)/winnie_common.sh
 cd ${WORKSPACE}
-make sql/postgis_tiger_geocoder--TEMPLATED--TO--ANY.sql
+#make sql/postgis_tiger_geocoder--TEMPLATED--TO--ANY.sql
+make clean
 make
 make install
+export ADDRESS_STANDARDIZER='address_standardizer'
 cp data/*.sql ${PGPATHEDB}/share/extension/
 cp *.control ${PGPATHEDB}/share/extension/
 make installcheck
