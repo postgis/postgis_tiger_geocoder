@@ -1,0 +1,45 @@
+pipeline {
+    agent { label 'winnie'}
+    stages {
+        stage('Test') {
+            matrix {
+                axes {
+                    axis {
+                        name 'PG_VER'
+                        values '16', '17', '18'
+                    }
+                }
+                agent { label 'winnie'}
+                stages {
+                    stage('PG Start') {
+                        steps {
+                            script {
+                                bat """
+                                    %WORKSPACE%\\ci\\winnie\\run_msys.bat "%WORKSPACE%\\ci\\winnie\\pg_init_start.sh"
+                                """
+                            }
+                        }
+                    }
+                    stage('Test') {
+                        steps {
+                            script {
+                                bat """
+                                    %WORKSPACE%\\ci\\winnie\\run_msys.bat "%WORKSPACE%\\ci\\winnie\\regress.sh"
+                                """
+                            }
+                        }
+                    }
+                    stage('Package') {
+                        steps {
+                            script {
+                                bat """
+                                    %WORKSPACE%\\ci\\winnie\\run_msys.bat "%WORKSPACE%\\ci\\winnie\\package.sh"
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
