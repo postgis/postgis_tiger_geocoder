@@ -27,15 +27,5 @@ BEGIN
     ) THEN
         ALTER TYPE tiger.norm_addy ADD ATTRIBUTE address_alphanumeric varchar;
     END IF;
-
-    IF NOT EXISTS (
-        SELECT 1
-        FROM pg_attribute
-        WHERE attrelid = norm_addy_relid
-          AND attname = 'country'
-          AND NOT attisdropped
-    ) THEN
-        ALTER TYPE tiger.norm_addy ADD ATTRIBUTE country varchar(2);
-    END IF;
 END;
 $$;

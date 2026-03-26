@@ -8,7 +8,6 @@
 -- is only resolved when PAGC parsing is invoked, while still using a single
 -- standardize_address() call to preserve the wrapper speedup work.
 -- USAGE: SELECT * FROM tiger.pagc_normalize_address('One Devonshire Place, PH 301, Boston, MA 02109');
-SELECT tiger.SetSearchPathForInstall('tiger');
 CREATE OR REPLACE FUNCTION pagc_normalize_address(in_rawinput character varying)
   RETURNS norm_addy AS
 $$
