@@ -1,4 +1,4 @@
-\o /dev/null
+\o discard.out
 BEGIN;
 
 INSERT INTO tiger.zip_lookup_base(zip, state, county, city, statefp)
@@ -58,6 +58,6 @@ FROM geocode_intersection('Weld', 'School', 'TX', 'Coppell')
 ORDER BY rating
 LIMIT 1;
 
-\o /dev/null
+\o discard.out
 ROLLBACK;
 \o

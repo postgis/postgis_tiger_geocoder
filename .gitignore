@@ -30,6 +30,7 @@ expected
 *.dylib
 *.pdf
 *.epub
+*.out
 .idea/*
 .syntastic_c_config
 .vs/*
