@@ -180,3 +180,9 @@ exist.
         ST_Y(geomout) As lat, (addy).*
     FROM geocode('1731 New Hampshire Avenue Northwest, Washington, DC 20010') As g;
     ```
+
+## CI Status
+
+**Winnie**: [![Build Status](https://winnie.postgis.net/view/postgis_tiger_geocoder/job/postgis_tiger_geocoder_main/badge/icon)](https://winnie.postgis.net/view/postgis_tiger_geocoder/job/postgis_tiger_geocoder_main/)
+
+**Woodie**: [![status-badge](https://woodie.osgeo.org/api/badges/131/status.svg)](https://woodie.osgeo.org/repos/131)
