@@ -23,9 +23,6 @@ mkdir -p $outdir/share/extension
 
 echo "POSTGIS_TIGER_GEOCODER: ${TG_VER} https://gitea.osgeo.org/postgis/postgis_tiger_geocoder.git" > $verfile
 
-strip *.dll
-
-
 cp -r *.control ${outdir}/share/extension
 cp -r data/*.sql ${outdir}/share/extension
 cp -r README.md ${outdir}/
