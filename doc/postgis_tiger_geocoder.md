@@ -4,6 +4,8 @@ A PL/pgSQL geocoder for US Census TIGER/Line data, installed into the `tiger` sc
 
 > **Note:** The `tiger` schema must be on the database `search_path` for all functions to resolve correctly.
 
+Refer to the [README](../README.md#loading-data) for instructions how to load data.
+
 ---
 
 ## Table of Contents
@@ -620,12 +622,3 @@ SELECT CreateTopology('boston_topo', 26986);
 SELECT Topology_Load_Tiger('boston_topo', 'place', 'Boston');
 -- → 'Loaded 1234 nodes, 4567 edges, 890 faces'
 ```
-
----
-
-## See Also
-
-- [PostGIS Tiger Geocoder — Official Docs](https://postgis.net/docs/Extras.html#Tiger_Geocoder)
-- [Address Standardizer Extension](https://postgis.net/docs/Extras.html#Address_Standardizer)
-- [Tiger Geocoder Cheatsheet](https://postgis.net/docs/tiger_geocoder_cheatsheet-en.html)
-- [Installing Tiger Geocoder](https://postgis.net/docs/postgis_installation.html#install_tiger_geocoder_extension)
