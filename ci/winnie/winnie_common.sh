@@ -52,7 +52,7 @@ CPPFLAGS="-I${PGPATH}/include"
 export PATH="${LZ4_PATH}/bin:${LZ4_PATH}/lib:${PATH}"
 
 if  [[ "${OVERRIDE}" == '' ]] ; then
-	export GEOS_VER=3.14
+	export GEOS_VER=3.15
 	export GDAL_VER=3.9.2
 	export PROJ_VER=8.2.1
 	export SFCGAL_VER=2.2.0
