@@ -1,9 +1,11 @@
-# postgis_tiger_geocoder 2025.1dev
+# postgis_tiger_geocoder 2025.1
 
-2026/xx/xx
+2026/06/xx
+This version requires PostgreSQL 16 and above
 
 ## Breaking Changes
 
+- Remove support for PostgreSQL < 16 (Regina Obe)
 - `postgis_tiger_geocoder` moved out of the main PostGIS tree into its own
   repository during the PostGIS 3.7 cycle (Paul Ramsey)
 
