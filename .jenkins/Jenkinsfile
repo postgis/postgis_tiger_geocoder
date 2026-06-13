@@ -6,7 +6,7 @@ pipeline {
                 axes {
                     axis {
                         name 'PG_VER'
-                        values '16', '17', '18'
+                        values '16', '17', '18', '19'
                     }
                 }
                 agent { label 'winnie'}
