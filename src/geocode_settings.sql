@@ -18,17 +18,17 @@ DECLARE var_temp text;
 BEGIN
 	IF NOT EXISTS(SELECT table_name FROM information_schema.columns WHERE table_schema = 'tiger' AND table_name = 'geocode_settings')  THEN
 		CREATE TABLE tiger.geocode_settings(name text primary key, setting text, unit text, category text, short_desc text);
-		GRANT SELECT ON geocode_settings TO public;
+		GRANT SELECT ON tiger.geocode_settings TO public;
 	ELSE
 		-- Insist on invoking Postgres logic of owning table by extension. This prevent attacks like CVE-2022-2625.
-		CREATE TABLE IF NOT EXISTS geocode_settings(name text primary key, setting text, unit text, category text, short_desc text);
+		CREATE TABLE IF NOT EXISTS tiger.geocode_settings(name text primary key, setting text, unit text, category text, short_desc text);
 	END IF;
 	IF NOT EXISTS(SELECT table_name FROM information_schema.columns WHERE table_schema = 'tiger' AND table_name = 'geocode_settings_default')  THEN
 		CREATE TABLE IF NOT EXISTS tiger.geocode_settings_default(name text primary key, setting text, unit text, category text, short_desc text);
 		GRANT SELECT ON tiger.geocode_settings_default TO public;
 	ELSE
 		-- Same as above.
-		CREATE TABLE IF NOT EXISTS geocode_settings_default(name text primary key, setting text, unit text, category text, short_desc text);
+		CREATE TABLE IF NOT EXISTS tiger.geocode_settings_default(name text primary key, setting text, unit text, category text, short_desc text);
 	END IF;
 	--recreate defaults
 	TRUNCATE TABLE tiger.geocode_settings_default;
@@ -55,19 +55,19 @@ SELECT tiger.install_geocode_settings(); /** create the table if it doesn't exis
 CREATE OR REPLACE FUNCTION get_geocode_setting(setting_name text)
 RETURNS text AS
 $$
-SELECT COALESCE(gc.setting,gd.setting) As setting FROM geocode_settings_default AS gd LEFT JOIN geocode_settings AS gc ON gd.name = gc.name  WHERE gd.name = $1;
+SELECT COALESCE(gc.setting,gd.setting) As setting FROM tiger.geocode_settings_default AS gd LEFT JOIN tiger.geocode_settings AS gc ON gd.name = gc.name  WHERE gd.name = $1;
 $$
 language sql STABLE;
 
 CREATE OR REPLACE FUNCTION set_geocode_setting(setting_name text, setting_value text)
 RETURNS text AS
 $$
-INSERT INTO geocode_settings(name, setting, unit, category, short_desc)
+INSERT INTO tiger.geocode_settings(name, setting, unit, category, short_desc)
 SELECT name, setting, unit, category, short_desc
-    FROM geocode_settings_default
-    WHERE name NOT IN(SELECT name FROM geocode_settings);
+    FROM tiger.geocode_settings_default
+    WHERE name NOT IN(SELECT name FROM tiger.geocode_settings);
 
-UPDATE geocode_settings SET setting = $2 WHERE name = $1
+UPDATE tiger.geocode_settings SET setting = $2 WHERE name = $1
 	RETURNING setting;
 $$
 language sql VOLATILE;

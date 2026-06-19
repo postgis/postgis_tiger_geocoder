@@ -32,34 +32,34 @@ DECLARE
     var_sql text := '';
     var_zip varchar(5)[];
     in_statefp varchar(2) ;
-    var_debug boolean := get_geocode_setting('debug_geocode_intersection')::boolean;
+    var_debug boolean := tiger.get_geocode_setting('debug_geocode_intersection')::boolean;
     results record;
 BEGIN
     IF COALESCE(roadway1,'') = '' OR COALESCE(roadway2,'') = '' THEN
         -- not enough to give a result just return
         RETURN ;
     ELSE
-        var_na_road := normalize_address('0 ' || roadway1 || ', ' || COALESCE(in_city,'') || ', ' || in_state || ' ' || in_zip);
-        var_na_inter1  := normalize_address('0 ' || roadway2 || ', ' || COALESCE(in_city,'') || ', ' || in_state || ' ' || in_zip);
+        var_na_road := tiger.normalize_address('0 ' || roadway1 || ', ' || COALESCE(in_city,'') || ', ' || in_state || ' ' || in_zip);
+        var_na_inter1  := tiger.normalize_address('0 ' || roadway2 || ', ' || COALESCE(in_city,'') || ', ' || in_state || ' ' || in_zip);
     END IF;
     var_road_name := trim(lower(COALESCE(var_na_road.streetName, '')));
     var_road_fullname := trim(lower(var_na_road.streetName || ' ' || COALESCE(var_na_road.streetTypeAbbrev,'')));
     var_inter_name := trim(lower(COALESCE(var_na_inter1.streetName, '')));
     var_inter_fullname := trim(lower(var_na_inter1.streetName || ' ' || COALESCE(var_na_inter1.streetTypeAbbrev,'')));
-    var_road_input_normalized := normalize_street_name(trim(lower(roadway1)));
-    var_inter_input_normalized := normalize_street_name(trim(lower(roadway2)));
-    in_statefp := statefp FROM state_lookup As s WHERE s.abbrev = upper(in_state);
+    var_road_input_normalized := tiger.normalize_street_name(trim(lower(roadway1)));
+    var_inter_input_normalized := tiger.normalize_street_name(trim(lower(roadway2)));
+    in_statefp := statefp FROM tiger.state_lookup As s WHERE s.abbrev = upper(in_state);
     IF COALESCE(in_zip,'') > '' THEN -- limit search to 2 plus or minus the input zip
-        var_zip := zip_range(in_zip, -2,2);
+        var_zip := tiger.zip_range(in_zip, -2,2);
     END IF;
 
     IF var_zip IS NULL AND in_city > '' THEN
-        var_zip := array_agg(zip) FROM zip_lookup_base WHERE statefp = in_statefp AND lower(city) = lower(in_city);
+        var_zip := array_agg(zip) FROM tiger.zip_lookup_base WHERE statefp = in_statefp AND lower(city) = lower(in_city);
     END IF;
 
     -- if we don't have a city or zip, don't bother doing the zip check, just keep as null
     IF var_zip IS NULL AND in_city > '' THEN
-        var_zip := array_agg(zip) FROM zip_lookup_base WHERE statefp = in_statefp AND lower(city) LIKE lower(in_city) || '%'  ;
+        var_zip := array_agg(zip) FROM tiger.zip_lookup_base WHERE statefp = in_statefp AND lower(city) LIKE lower(in_city) || '%'  ;
     END IF;
     IF var_debug THEN
 		RAISE NOTICE 'var_zip: %, city: %', quote_nullable(var_zip), quote_nullable(in_city);
@@ -71,11 +71,11 @@ BEGIN
                                 WHERE statefp = $1 AND (
                                     lower(name) = $2 ' ||
                                 CASE WHEN length(var_na_road.streetName) > 5 THEN ' or lower(fullname) LIKE $6 || ''%'' ' ELSE '' END ||
-                                ' or normalize_street_name(fullname) = $10)'
+                                ' or tiger.normalize_street_name(fullname) = $10)'
                                 || ')  AS f LEFT JOIN (SELECT * FROM tiger.addr As addr WHERE addr.statefp = $1) As addr ON (addr.tlid = f.tlid AND addr.statefp = f.statefp)
                     WHERE $5::text[] IS NULL OR addr.zip = ANY($5::text[]) OR addr.zip IS NULL
                     ORDER BY CASE
-                        WHEN lower(f.fullname) = $6 OR normalize_street_name(f.fullname) = $10 THEN 0
+                        WHEN lower(f.fullname) = $6 OR tiger.normalize_street_name(f.fullname) = $10 THEN 0
                         ELSE 1 END
                     LIMIT 50000
                   ),
@@ -84,11 +84,11 @@ BEGIN
                                 WHERE statefp = $1 AND (
                                     lower(name) = $4 ' ||
                                 CASE WHEN length(var_na_inter1.streetName) > 5 THEN ' or lower(fullname) LIKE $7 || ''%'' ' ELSE '' END ||
-                                ' or normalize_street_name(fullname) = $11)'
+                                ' or tiger.normalize_street_name(fullname) = $11)'
                                 || ' )  AS f LEFT JOIN (SELECT * FROM tiger.addr As addr WHERE addr.statefp = $1) AS addr ON (addr.tlid = f.tlid AND addr.statefp = f.statefp)
                     WHERE $5::text[] IS NULL OR addr.zip = ANY($5::text[])  or addr.zip IS NULL
                     ORDER BY CASE
-                    WHEN lower(f.fullname) = $7 OR normalize_street_name(f.fullname) = $11 THEN 0
+                    WHEN lower(f.fullname) = $7 OR tiger.normalize_street_name(f.fullname) = $11 THEN 0
                     ELSE 1 END
                     LIMIT 50000
                   ),
@@ -100,7 +100,7 @@ BEGIN
                     ORDER BY CASE
                         WHEN lower(a.name) = $4 THEN 0 ELSE 1 END
                         + CASE
-                        WHEN lower(e.fullname) = $7 OR normalize_street_name(e.fullname) = $11 THEN 0
+                        WHEN lower(e.fullname) = $7 OR tiger.normalize_street_name(e.fullname) = $11 THEN 0
                         ELSE 1 END
                     LIMIT 5000) ,
         e2 AS (SELECT e.the_geom, e.tnidf, e.tnidt, a.*,
@@ -111,12 +111,12 @@ BEGIN
 
                     WHERE (
                         lower(e.fullname) = $7
-                        OR normalize_street_name(e.fullname) = $11
+                        OR tiger.normalize_street_name(e.fullname) = $11
                         OR lower(a.name) LIKE $4 || ''%'')
                     ORDER BY CASE
                         WHEN lower(a.name) = $4 THEN 0 ELSE 1 END
                         + CASE
-                        WHEN lower(e.fullname) = $7 OR normalize_street_name(e.fullname) = $11 THEN 0
+                        WHEN lower(e.fullname) = $7 OR tiger.normalize_street_name(e.fullname) = $11 THEN 0
                         ELSE 1 END
                     LIMIT 5000
                     ),
@@ -134,11 +134,11 @@ BEGIN
                                 + tiger.levenshtein_ignore_case(p.name, $3)
                                 + tiger.levenshtein_ignore_case(e1.name || COALESCE('' '' || e1.sufqualabr, ''''),$2)
                                 + CASE
-                                    WHEN lower(e1.fullname) = $6 OR normalize_street_name(e1.fullname) = $10 THEN 0
+                                    WHEN lower(e1.fullname) = $6 OR tiger.normalize_street_name(e1.fullname) = $10 THEN 0
                                     ELSE tiger.levenshtein_ignore_case(e1.fullname, $6)
                                   END
                                 + CASE
-                                    WHEN normalize_street_name(e2.fullname) = $11 THEN 0
+                                    WHEN tiger.normalize_street_name(e2.fullname) = $11 THEN 0
                                     ELSE tiger.levenshtein_ignore_case(e2.name || COALESCE('' '' || e2.sufqualabr, ''''),$4)
                                   END
                                 AS a_rating

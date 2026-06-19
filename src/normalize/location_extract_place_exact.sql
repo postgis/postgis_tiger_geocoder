@@ -10,8 +10,8 @@ CREATE OR REPLACE FUNCTION location_extract_place_exact(
 AS $$
   SELECT (
       SELECT substring(fullStreet, '(?i)(' || name || ')$')
-      FROM place
-      WHERE (stateAbbrev IS NULL OR place.statefp = (SELECT statefp FROM state WHERE stusps = stateAbbrev))
+      FROM tiger.place
+      WHERE (stateAbbrev IS NULL OR place.statefp = (SELECT statefp FROM tiger.state WHERE stusps = stateAbbrev))
         AND fullStreet ILIKE '%' || name || '%'
         AND texticregexeq(fullStreet, '(?i)' || name || '$')
       ORDER BY length(name) DESC
