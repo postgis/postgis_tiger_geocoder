@@ -1,6 +1,6 @@
 # postgis_tiger_geocoder 2025.1
 
-2026/06/xx
+2026/06/19
 This version requires PostgreSQL 16 and above
 
 ## Breaking Changes
@@ -21,6 +21,8 @@ This version requires PostgreSQL 16 and above
 
 ## Bug Fixes
 
+- [GT-24](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/24), create `tiger_data` schema from shell tiger loader scripts
+			  (Darafei Praliaskouski)
 - [TR-1599](https://trac.osgeo.org/postgis/ticket/1599), [73892dce](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/commit/73892dce), improve country-aware address normalization in `normalize_address()`
   and related wrapper paths (Darafei Praliaskouski)
 - [TR-2459](https://trac.osgeo.org/postgis/ticket/2459), [73892dce](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/commit/73892dce), speed up `pagc_normalize_address()` by avoiding redundant wrapper
