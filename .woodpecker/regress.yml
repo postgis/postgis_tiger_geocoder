@@ -9,17 +9,10 @@ variables:
     - export PGPORT=$$(grep ^port /etc/postgresql/$${PGVER}/main/postgresql.conf | awk '{print $$3}')
     - export SRCDIR=$${CI_WORKSPACE}
     - pg_config --version
-  steps-start-postgresql: &steps-start-postgresql
-    - service postgresql start $${PGVER}
-    - psql -c 'select version()' template1
-  steps-pg-build: &steps-pg-build
-    - cd "$${SRCDIR}"
-    - make
-  steps-pg-install: &steps-pg-install
-    - make install
   steps-pg-test-install: &steps-pg-test-install
     - service postgresql start $${PGVER}
-    - make installcheck
+    - make install
+    - make installcheck || { find . -name "regression.diffs" -exec cat {} +; exit 1; }
 
 clone:
   git:
@@ -28,40 +21,18 @@ clone:
 
 steps:
 
-  build-pg16:
-    image: *test-image
-    environment:
-      PGVER: 16
-    commands:
-      - <<: *steps-env
-      - <<: *steps-pg-build
-
-  build-pg18:
-    image: *test-image
-    environment:
-       PGVER: 18
-    commands:
-      - <<: *steps-env
-      - <<: *steps-pg-build
-
   installcheck-pg16:
     image: *test-image
-    depends_on: build-pg16
     environment:
       PGVER: 16
     commands:
       - <<: *steps-env
-      - <<: *steps-start-postgresql
-      - <<: *steps-pg-install
       - <<: *steps-pg-test-install
 
   installcheck-pg18:
     image: *test-image
-    depends_on: build-pg18
     environment:
       PGVER: 18
     commands:
       - <<: *steps-env
-      - <<: *steps-start-postgresql
-      - <<: *steps-pg-install
       - <<: *steps-pg-test-install
