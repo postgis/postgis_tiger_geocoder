@@ -18,6 +18,7 @@ DECLARE
   location VARCHAR;
   lstate VARCHAR;
   stmt VARCHAR;
+  location_regex VARCHAR;
   street_array text[];
   word_count INTEGER;
   rec RECORD;
@@ -77,8 +78,9 @@ BEGIN
     tempString := ' ' || tempString;
   END LOOP;
 
-  location := replace(location,' ',ws || '+');
-  location := substring(fullStreet,'(?i)' || location || '$');
+  location_regex := tiger.regex_escape(location);
+  location_regex := replace(location_regex,' ',ws || '+');
+  location := substring(fullStreet,'(?i)' || location_regex || '$');
 
   RETURN location;
 END;

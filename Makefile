@@ -106,6 +106,7 @@ sql/tiger_geocoder_upgrade_minor.sql: src/utility/set_search_path.sql \
   	src/tiger_loader.sql \
 	src/utility/utmzone.sql \
 	src/utility/cull_null.sql \
+	src/utility/regex_escape.sql \
 	src/utility/nullable_levenshtein.sql \
 	src/utility/levenshtein_ignore_case.sql \
 	src/normalize/end_soundex.sql \
@@ -144,6 +145,7 @@ sql/tiger_geocoder.sql: sql_bits/norm_addy_create.sql.in \
 	src/utility/set_search_path.sql \
 	src/utility/utmzone.sql \
 	src/utility/cull_null.sql \
+	src/utility/regex_escape.sql \
 	src/utility/nullable_levenshtein.sql \
 	src/utility/levenshtein_ignore_case.sql \
 	src/normalize/end_soundex.sql \
