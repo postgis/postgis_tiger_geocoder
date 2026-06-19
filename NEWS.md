@@ -7,7 +7,8 @@ This version requires PostgreSQL 16 and above
 
 - Remove support for PostgreSQL < 16 (Regina Obe)
 - `postgis_tiger_geocoder` moved out of the main PostGIS tree into its own
-  repository during the PostGIS 3.7 cycle (Paul Ramsey)
+  repository during the PostGIS 3.7 cycle (Paul Ramsey, Regina Obe)
+- quote_ident tiger loader schema and table names (Paul Ramsey)
 
 ## Enhancements
 
