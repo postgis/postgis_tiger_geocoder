@@ -10,21 +10,21 @@ This version requires PostgreSQL 16 and above
   repository during the PostGIS 3.7 cycle (Paul Ramsey, Regina Obe)
 - quote_ident tiger loader schema and table names (Paul Ramsey)
 
+## Security
+
+- [GT-26](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/26), quote_ident tiger loader schema and table names (Paul Ramsey)
+- [GT-3](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/3), Prefix operators with system name space
+
 ## Enhancements
 
-- #6013, update the geocoder to load TIGER 2025 data (Regina Obe)
+- [TR-6013](https://trac.osgeo.org/postgis/ticket/6013), update the geocoder to load TIGER 2025 data (Regina Obe)
 
 ## Bug Fixes
 
-- #1599, improve country-aware address normalization in `normalize_address()`
+- [TR-1599](https://trac.osgeo.org/postgis/ticket/1599), [73892dce](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/commit/73892dce), improve country-aware address normalization in `normalize_address()`
   and related wrapper paths (Darafei Praliaskouski)
-- #2459, speed up `pagc_normalize_address()` by avoiding redundant wrapper
+- [TR-2459](https://trac.osgeo.org/postgis/ticket/2459), [73892dce](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/commit/73892dce), speed up `pagc_normalize_address()` by avoiding redundant wrapper
   parsing while preserving ZIP+4 and country details from the structured parser
   (Darafei Praliaskouski)
-- #1461, `geocode_intersection()` now tolerates irregular spacing in highway
+- [TR-1461](https://trac.osgeo.org/postgis/ticket/1461), [73892dce](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/commit/73892dce), `geocode_intersection()` now tolerates irregular spacing in highway
   names such as `I- 635` vs `I-635` (Darafei Praliaskouski)
-- Restore PAGC tables and `pagc_normalize_address()` support in `CREATE
-  EXTENSION` builds when `address_standardizer` is used for geocoding
-  (Regina Obe)
-- Schema qualify extension dependencies for PostgreSQL 16 and above
-  (Regina Obe)
