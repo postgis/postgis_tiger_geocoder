@@ -88,6 +88,7 @@ BEGIN
   END IF;
 
   ws := E'[ ,.\t\n\f\r]';
+  rawInput := regexp_replace(rawInput, '^(.+,[^,]*[0-9][^,]*),[[:space:]]*[[:alpha:]][[:alpha:] .-]*$', '\1');
 
   IF debug_flag THEN
     raise notice '% input: %', clock_timestamp(), rawInput;
