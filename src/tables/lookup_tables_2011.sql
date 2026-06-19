@@ -754,6 +754,7 @@ SELECT name, abbrev, true
         ('STATE HWY', 'State Hwy'),
         ('STATE HIGHWAY', 'State Hwy'),
         ('STATE HIGH WAY', 'State Hwy'),
+        ('SH', 'State Hwy'),
         ('STATE RD', 'State Rd'),
         ('STATE ROAD', 'State Rd'),
         ('STATE ROUTE', 'State Rte'),

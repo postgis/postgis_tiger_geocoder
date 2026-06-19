@@ -23,6 +23,8 @@ This version requires PostgreSQL 16 and above
 
 - [GT-2](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues/2), strip trailing country
   names before built-in `normalize_address()` parsing
+- [GT-10](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues/10), support `SH` and compact
+  `SH121` input for state-highway geocoding
 - [TR-1599](https://trac.osgeo.org/postgis/ticket/1599), [73892dce](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/commit/73892dce), improve country-aware address normalization in `normalize_address()`
   and related wrapper paths (Darafei Praliaskouski)
 - [TR-2459](https://trac.osgeo.org/postgis/ticket/2459), [73892dce](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/commit/73892dce), speed up `pagc_normalize_address()` by avoiding redundant wrapper
