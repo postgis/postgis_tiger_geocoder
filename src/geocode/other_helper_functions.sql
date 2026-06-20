@@ -146,16 +146,16 @@ FROM (SELECT table_name, table_schema FROM
 			(i.tablename = c.table_name AND i.schemaname = c.table_schema
 				AND  indexdef LIKE '%least_hn(%' || c.column_name || '%')
 WHERE i.tablename IS NULL
--- var_ops lower --
+-- SP-GiST lower indexes for LIKE prefix searches --
 UNION ALL
-SELECT 'CREATE INDEX idx_' || c.table_schema || '_' || c.table_name || '_l' || c.column_name || '_var_ops' || ' ON ' || c.table_schema || '.' || c.table_name || ' USING btree(lower(' || c.column_name || ') varchar_pattern_ops);' As index
+SELECT 'CREATE INDEX idx_' || c.table_schema || '_' || c.table_name || '_l' || c.column_name || '_spgist' || ' ON ' || c.table_schema || '.' || c.table_name || ' USING spgist(lower(' || c.column_name || '));' As index
 FROM (SELECT table_name, table_schema FROM
 	information_schema.tables WHERE table_type OPERATOR(pg_catalog.=) 'BASE TABLE' AND (table_name LIKE '%featnames' or table_name LIKE '%place' or table_name LIKE '%zip_lookup_base' or table_name LIKE '%zip_state_loc') AND table_schema IN('tiger','tiger_data')) As t  INNER JOIN
 	(SELECT * FROM information_schema.columns WHERE column_name IN('name', 'city', 'place', 'fullname') ) AS c
 		ON (t.table_name = c.table_name AND t.table_schema = c.table_schema)
 		LEFT JOIN pg_catalog.pg_indexes i ON
 			(i.tablename = c.table_name AND i.schemaname = c.table_schema
-				AND  indexdef LIKE '%btree%(%lower%' || c.column_name || ')%varchar_pattern_ops%')
+				AND  indexdef LIKE '%spgist%(%lower%' || c.column_name || ')%')
 WHERE i.tablename IS NULL
 -- var_ops mtfcc --
 /** UNION ALL

@@ -137,4 +137,5 @@ SELECT '#sqlify9' As ticket, strpos(
   pg_get_functiondef(to_regprocedure((SELECT n.nspname || '.rate_attributes(character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying,character varying)' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder'))),
   (SELECT n.nspname || '.rate_attributes(' FROM pg_extension e JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'postgis_tiger_geocoder')
 ) > 0;
+SELECT '#1846' As ticket, strpos(tiger.missing_indexes_generate_script(), 'USING spgist(lower(') > 0;
 --\timing
