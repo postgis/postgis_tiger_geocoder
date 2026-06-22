@@ -89,6 +89,7 @@ sql/test-upgrade.sql: | sql
 
 expected/test-upgrade.out: sql/test-upgrade.sql | expected
 	cp $< $@
+	echo "GT-24|t" >> $@
 
 sql/test-pagc_normalize_address.sql: sql_bits/test_tuples_only_unaligned.sql.in src/regress/pagc_normalize_address_regress.sql | sql
 	cat $^ > $@
