@@ -81,15 +81,13 @@ sql/test-normalize_address.sql: sql_bits/test_tuples_only_unaligned.sql.in src/r
 sql/test-geocode_intersection_spacing.sql: sql_bits/test_tuples_only_unaligned.sql.in sql_bits/test-geocode_intersection_spacing.sql.in | sql
 	cat $^ > $@
 
-sql/test-upgrade.sql: | sql
-	echo "\t on" > $@
-	echo "\a" >> $@
+sql/test-upgrade.sql: sql_bits/test_tuples_only_unaligned_plain.sql.in | sql
+	cat $^ > $@
 	echo 'ALTER EXTENSION ${EXTENSION} UPDATE TO "ANY"; ALTER EXTENSION ${EXTENSION} UPDATE TO "$(EXTVERSION)";' >> $@
 	echo "SELECT 'GT-24', position('CREATE SCHEMA IF NOT EXISTS tiger_data' in loader_generate_script(ARRAY['RI'], 'sh')) > 0;" >> $@
 
-expected/test-upgrade.out: sql/test-upgrade.sql | expected
-	cp $< $@
-	echo "GT-24|t" >> $@
+expected/test-upgrade.out: sql_bits/test_upgrade.out.in | expected
+	cat $^ > $@
 
 sql/test-pagc_normalize_address.sql: sql_bits/test_tuples_only_unaligned.sql.in src/regress/pagc_normalize_address_regress.sql | sql
 	cat $^ > $@
@@ -187,7 +185,7 @@ $(UPGRADEABLE_VERSIONS): data/$(TAG_UPGRADE)
 	cp "data/$(TAG_UPGRADE)" "data/$(EXTENSION)--$@--ANY.sql"
 
 #only extension files
-EXTRA_CLEAN += $(wildcard expected/*--*.out)
+EXTRA_CLEAN += $(wildcard expected/*--*.out) $(wildcard results/*--*.out)
 
 #include upgrade-paths-rules.mk
 
