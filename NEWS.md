@@ -1,6 +1,6 @@
-# postgis_tiger_geocoder 2025.1
+# 2025.1
 
-2026/06/xx
+2026/06/22
 This version requires PostgreSQL 16 and above
 
 ## Breaking Changes
@@ -16,7 +16,7 @@ This version requires PostgreSQL 16 and above
 ## Security
 
 - [GT-26](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/26), quote_ident tiger loader schema and table names (Paul Ramsey)
-- [GT-3](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/3), Prefix operators with system name space
+- [GT-3](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/3), Prefix operators with system name space (Paul Ramsey)
 
 ## Enhancements
 
