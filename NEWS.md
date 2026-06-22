@@ -1,6 +1,6 @@
 # postgis_tiger_geocoder 2025.1
 
-2026/06/19
+2026/06/xx
 This version requires PostgreSQL 16 and above
 
 ## Breaking Changes
@@ -9,6 +9,9 @@ This version requires PostgreSQL 16 and above
 - `postgis_tiger_geocoder` moved out of the main PostGIS tree into its own
   repository during the PostGIS 3.7 cycle (Paul Ramsey, Regina Obe)
 - quote_ident tiger loader schema and table names (Paul Ramsey)
+- No longer set search path of database to include tiger.
+  Users are expected to do this themselves.
+- Refer to [README](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder#readme) for guidance (Regina Obe)
 
 ## Security
 
