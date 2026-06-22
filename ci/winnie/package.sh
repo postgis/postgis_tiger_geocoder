@@ -11,7 +11,7 @@ export REL_PGVER=${PG_VER//./} #strip the period
 
 
 export RELDIR=${PROJECTS}/postgis_tiger_geocoder/builds/${TG_VER}
-export RELVERDIR=postgis_tiger_geocoder-pg${REL_PGVER}-binaries-${TG_VER}w${OS_BUILD}${GCC_TYPE}
+export RELVERDIR=postgis_tiger_geocoder-pg${REL_PGVER}-${TG_VER}w${OS_BUILD}${GCC_TYPE}
 
 outdir="${RELDIR}/${RELVERDIR}"
 package="${RELDIR}/${RELVERDIR}.zip"

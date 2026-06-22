@@ -82,8 +82,8 @@ sql/test-geocode_intersection_spacing.sql: sql_bits/test_tuples_only_unaligned.s
 	cat $^ > $@
 
 sql/test-upgrade.sql: | sql
-	echo '\\pset tuples_only on' > $@
-	echo '\\pset format unaligned' >> $@
+	echo "\t on" > $@
+	echo "\a" >> $@
 	echo 'ALTER EXTENSION ${EXTENSION} UPDATE TO "ANY"; ALTER EXTENSION ${EXTENSION} UPDATE TO "$(EXTVERSION)";' >> $@
 	echo "SELECT 'GT-24', position('CREATE SCHEMA IF NOT EXISTS tiger_data' in loader_generate_script(ARRAY['RI'], 'sh')) > 0;" >> $@
 
