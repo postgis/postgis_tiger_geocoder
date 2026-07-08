@@ -98,7 +98,7 @@ sql/$(EXTENSION)_pre.sql: sql/tiger_geocoder.sql  sql_bits/mark_editable_objects
 data/$(EXTENSION).sql: sql/$(EXTENSION)_pre.sql | data
 	cat $^ > $@
 
-data/$(EXTENSION)--ANY--$(EXTVERSION).sql: sql/tiger_geocoder_upgrade_minor.sql sql_bits/mark_editable_objects.sql.in | sql
+data/$(EXTENSION)--ANY--$(EXTVERSION).sql: sql/tiger_geocoder_upgrade_minor.sql sql_bits/mark_editable_objects.sql.in | data
 	cat $^ > $@
 
 sql/tiger_geocoder_upgrade_minor.sql: src/utility/set_search_path.sql \
