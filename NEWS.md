@@ -1,3 +1,11 @@
+# 2025.2
+2026/xx/xx
+This version requires PostgreSQL 16 and above
+
+## Bug Fixes
+
+- [GT-35] Fix installation target (Devrim Gündüz)
+
 # 2025.1
 
 2026/06/22

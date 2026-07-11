@@ -42,7 +42,7 @@ REGRESS += test-pagc_normalize_address
 REGRESS_OPTS += --load-extension=address_standardizer
 endif
 
-all: data/$(TAG_UPGRADE) sql/$(EXTENSION)_pre.sql data/$(EXTENSION)--$(EXTVERSION).sql data/$(EXTENSION)--$(EXTVERSION)--ANY.sql data/$(EXTENSION)--ANY--$(EXTVERSION).sql $(UPGRADEABLE_VERSIONS) sql/test-normalize_address.sql sql/test-geocode_intersection_spacing.sql sql/test-pagc_normalize_address.sql expected/test-normalize_address.out expected/test-geocode_intersection_spacing.out expected/test-pagc_normalize_address.out sql/test-upgrade.sql expected/test-upgrade.out
+all: data/$(TAG_UPGRADE) sql/$(EXTENSION)_pre.sql data/$(EXTENSION)--$(EXTVERSION).sql data/$(EXTENSION)--$(EXTVERSION)--ANY.sql data/$(EXTENSION)--ANY--$(EXTVERSION).sql $(UPGRADEABLE_VERSIONS:%=data/$(EXTENSION)--%--ANY.sql) sql/test-normalize_address.sql sql/test-geocode_intersection_spacing.sql sql/test-pagc_normalize_address.sql expected/test-normalize_address.out expected/test-geocode_intersection_spacing.out expected/test-pagc_normalize_address.out sql/test-upgrade.sql expected/test-upgrade.out
 
 
 .PHONY: expected
@@ -176,13 +176,16 @@ sql/tiger_geocoder.sql: sql_bits/norm_addy_create.sql.in \
 	| sql
 	cat $^ > $@
 
-.PHONY: upgrade $(UPGRADEABLE_VERSIONS)
+.PHONY: upgrade
 
-upgrade: $(UPGRADEABLE_VERSIONS)
+upgrade: $(UPGRADEABLE_VERSIONS:%=data/$(EXTENSION)--%--ANY.sql)
 
-# A single recipe, but it runs once per element in the list
-$(UPGRADEABLE_VERSIONS): data/$(TAG_UPGRADE)
-	cp "data/$(TAG_UPGRADE)" "data/$(EXTENSION)--$@--ANY.sql"
+# Pattern rule: builds data/$(EXTENSION)--<version>--ANY.sql for each
+# version in UPGRADEABLE_VERSIONS. Named to match what DATA_built (and
+# PGXS's "all" target) actually asks for, unlike the old rule which only
+# defined phony targets named after the bare version numbers.
+data/$(EXTENSION)--%--ANY.sql: data/$(TAG_UPGRADE) | data
+	cp "$<" "$@"
 
 #only extension files
 EXTRA_CLEAN += $(wildcard expected/*--*.out) $(wildcard results/*--*.out)
