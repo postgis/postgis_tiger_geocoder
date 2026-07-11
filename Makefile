@@ -1,7 +1,6 @@
 include upgradeable_versions.mk
 EXTENSION    = postgis_tiger_geocoder
 EXTVERSION = $(shell grep default $(EXTENSION).control | cut -f2 -d'=' | tr -d "' ")
-MINORVERSION  = 2025.1
 GREP = grep
 PERL = perl
 PG_CONFIG = pg_config
