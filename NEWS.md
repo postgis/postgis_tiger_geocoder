@@ -2,9 +2,10 @@
 2026/xx/xx
 This version requires PostgreSQL 16 and above
 
-## Bug Fixes
+## Bug Fixes and Enhancements
 
-- [GT-35] Fix installation target (Devrim Gündüz)
+- [GT-35](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues/35) Fix installation target (Devrim Gündüz)
+- [GT-38](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/38) Fix parallel builds (Paul Ramsey)
 
 # 2025.1
 
