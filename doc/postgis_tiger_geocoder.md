@@ -1,9 +1,5 @@
 # PostGIS Tiger Geocoder — Function Reference
 
-A PL/pgSQL geocoder for US Census TIGER/Line data, installed into the `tiger` schema via `CREATE EXTENSION postgis_tiger_geocoder`. Covers address normalization, forward and reverse geocoding, data loaders, and topology utilities.
-
-> **Note:** The `tiger` schema must be on the database `search_path` for all functions to resolve correctly.
-
 Refer to the [README](../README.md#loading-data) for instructions how to load data.
 
 ---

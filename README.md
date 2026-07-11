@@ -1,11 +1,24 @@
-# TIGER GEOCODER
+# PostGIS TIGER GEOCODER
+
+The postgis_tiger_geocoder is a PL/pgSQL extension that contains functions
+for geocoding, reverse geocoding, and standardizing address data using
+[US Census TIGER/Line data](https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html).
+
+To achieve this, it also includes helper functions that generate commandline load scripts for downloading and loading into PostgreSQL the US Census TIGER data.
+
+All reference tables are installed in the `tiger` schema via `CREATE EXTENSION postgis_tiger_geocoder`.
+Data downloaded from census website is by default loaded into a schema `tiger_data` and these tables
+inherit from the core structures in `tiger` schema.
+
+> **Note:** The `tiger` schema must be on the database `search_path` for all functions to resolve correctly.
+
+For more details about using the functions, refer to the [Function Reference](doc/postgis_tiger_geocoder.md).
 
 postgis_tiger_geocoder PostgreSQL extension used to be part of the postgis project base.
 Project history notes, including the standalone split from PostGIS and recent
 standalone changes, live in [NEWS.md](NEWS.md).
 
 PostgreSQL 16 or higher is required.
-
 
 ## Building the extension
 ```sh
@@ -94,7 +107,8 @@ will output:
 # Pre-Data Load Requirements
 ## Linux/Unix/Mac users
 
-You will need wget, shp2pgsql, and unzip installed.
+You will need *wget*, *shp2pgsql*, and *unzip* installed on the computer you will be using
+to download and load the data.  This can be a different device from your main server.
 
 Once you generate the scripts using loader function, EDIT IT TO ADD `set -e -u` AT THE TOP;
 
@@ -111,10 +125,8 @@ sh foo.sh 1>out 2>err; tail -f err
 
 ## Windows Users
 
-You will need 7zip and wget.  7zip you can get
-from http://www.7-zip.org/ and wget you can get from
-https://eternallybored.org/misc/wget/
-
+You will need [7zip](https://www.7-zip.org/),  [wget](https://eternallybored.org/misc/wget/),
+and *shp2pgsql*.  Note that shp2pgsql is shipped as part of the [PostGIS Windows Bundle](https://postgis.net/documentation/getting_started/install_windows/).
 
 To generate a WINDOWS DOS script
 this will generate the script to download the national layers
