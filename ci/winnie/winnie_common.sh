@@ -53,16 +53,16 @@ export PATH="${LZ4_PATH}/bin:${LZ4_PATH}/lib:${PATH}"
 
 if  [[ "${OVERRIDE}" == '' ]] ; then
 	export GEOS_VER=3.15
-	export GDAL_VER=3.9.2
-	export PROJ_VER=8.2.1
-	export SFCGAL_VER=2.2.0
-	export CGAL_VER=6.0.1
+	export GDAL_VER=3.13.1
+	export PROJ_VER=9.8.1
+	export SFCGAL_VER=2.3.0
+	export CGAL_VER=6.0.2
 	export ICON_VER=1.17
 	export ZLIB_VER=1.2.13
 	export PROTOBUF_VER=3.2.0
 	export PROTOBUFC_VER=1.2.1
 	export JSON_VER=0.16
-	export PROJSO=libproj_8_2.dll
+	export PROJSO=libproj_9.dll
 	export LZ4_VER=1.9.3
 fi;
 
