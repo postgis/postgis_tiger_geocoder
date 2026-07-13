@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS tiger.tabblock20
     intptlon character varying(12) ,
     the_geom geometry(MultiPolygon,4269), housing float, pop float,
     PRIMARY KEY (statefp, geoid)
-) PARTITIONED BY LIST (statefp);
+) PARTITION BY LIST (statefp);
 
 ALTER TABLE tiger.faces ADD IF NOT EXISTS tractce20 varchar(6);
 ALTER TABLE tiger.faces ADD IF NOT EXISTS blkgrpce20 varchar(1);
@@ -495,8 +495,8 @@ BEGIN
 	FOR var_table IN SELECT unnest(var_partitioned_tables) LOOP
 		-- Rename old inherited table if it exists
 		IF EXISTS (
-			SELECT 1 FROM pg_class c
-			JOIN pg_namespace n ON n.oid = c.relnamespace
+			SELECT 1 FROM pg_catalog.pg_class c
+			JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
 			WHERE n.nspname = 'tiger' AND c.relname = var_table
 			  AND c.relkind = 'r'
 		) THEN
@@ -507,8 +507,8 @@ BEGIN
 		-- The partitioned parent should already exist from CREATE TABLE IF NOT EXISTS
 		-- in census_tables.sql / lookup_tables_2011.sql, but create it if missing
 		IF NOT EXISTS (
-			SELECT 1 FROM pg_class c
-			JOIN pg_namespace n ON n.oid = c.relnamespace
+			SELECT 1 FROM pg_catalog.pg_class c
+			JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
 			WHERE n.nspname = 'tiger' AND c.relname = var_table
 			  AND c.relkind = 'p'
 		) THEN
@@ -524,11 +524,11 @@ BEGIN
 			WHERE t.table_schema = 'tiger_data'
 			  AND t.table_name = s.statefp || '_' || var_table
 			  AND NOT EXISTS (
-				  SELECT 1 FROM pg_inherits i
-				  JOIN pg_class parent ON parent.oid = i.inhparent
-				  JOIN pg_class child ON child.oid = i.inhrelid
-				  JOIN pg_namespace pn ON pn.oid = parent.relnamespace
-				  JOIN pg_namespace cn ON cn.oid = child.relnamespace
+				  SELECT 1 FROM pg_catalog.pg_inherits i
+				  JOIN pg_catalog.pg_class parent ON parent.oid = i.inhparent
+				  JOIN pg_catalog.pg_class child ON child.oid = i.inhrelid
+				  JOIN pg_catalog.pg_namespace pn ON pn.oid = parent.relnamespace
+				  JOIN pg_catalog.pg_namespace cn ON cn.oid = child.relnamespace
 				  WHERE pn.nspname = 'tiger' AND parent.relname = var_table
 					AND cn.nspname = 'tiger_data' AND child.relname = s.statefp || '_' || var_table
 			  )

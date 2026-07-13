@@ -916,7 +916,11 @@ INSERT INTO tiger.zip_lookup_all
   GROUP BY zip, st_code, state, co_code, county, cs_code, countysub, pl_code, place;
 **/
 DROP TABLE IF EXISTS tiger.zip_lookup_base;
-DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.zip_lookup_base'::regclass) THEN ALTER TABLE tiger.zip_lookup_base RENAME TO zip_lookup_base_inherited; END IF; END $$;
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_inherits i JOIN pg_catalog.pg_class pc ON pc.oid = i.inhparent JOIN pg_catalog.pg_namespace pn ON pn.oid = pc.relnamespace WHERE pn.nspname = 'tiger' AND pc.relname = 'zip_lookup_base') THEN
+    ALTER TABLE tiger.zip_lookup_base RENAME TO zip_lookup_base_inherited;
+  END IF;
+END $$;
 CREATE TABLE IF NOT EXISTS tiger.zip_lookup_base (
     zip     varchar(5) NOT NULL,
     state   VARCHAR(40),
@@ -924,7 +928,8 @@ CREATE TABLE IF NOT EXISTS tiger.zip_lookup_base (
     city    VARCHAR(90),
     statefp varchar(2),
     PRIMARY KEY (statefp, zip)
-) PARTITIONED BY LIST (statefp);
+) PARTITION BY LIST (statefp);
+CREATE INDEX IF NOT EXISTS idx_tiger_zip_lookup_base_citysnd ON tiger.zip_lookup_base USING btree(@extschema:fuzzystrmatch@.soundex(city));
 
 -- INSERT INTO tiger.zip_lookup_base
 -- Populate through magic
@@ -1015,9 +1020,12 @@ CREATE TABLE tiger.state
 CREATE INDEX idx_tiger_state_the_geom_gist ON tiger.state USING gist(the_geom);
 
 DROP TABLE IF EXISTS tiger.place;
-DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.place'::regclass) THEN ALTER TABLE tiger.place RENAME TO place_inherited; END IF; END $$;
-CREATE TABLE IF NOT EXISTS tiger.place
-(
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_inherits i JOIN pg_catalog.pg_class pc ON pc.oid = i.inhparent JOIN pg_catalog.pg_namespace pn ON pn.oid = pc.relnamespace WHERE pn.nspname = 'tiger' AND pc.relname = 'place') THEN
+    ALTER TABLE tiger.place RENAME TO place_inherited;
+  END IF;
+END $$;
+CREATE TABLE IF NOT EXISTS tiger.place(
   gid serial NOT NULL,
   statefp character varying(2) NOT NULL,
   placefp character varying(5),
@@ -1037,36 +1045,46 @@ CREATE TABLE IF NOT EXISTS tiger.place
   intptlat character varying(11),
   intptlon character varying(12),
   the_geom @extschema:postgis@.geometry(MULTIPOLYGON,4269),
-  CONSTRAINT uidx_tiger_place_gid UNIQUE (gid),
   PRIMARY KEY (statefp, plcidfp)
-) PARTITIONED BY LIST (statefp);
-CREATE INDEX tiger_place_the_geom_gist ON tiger.place USING gist(the_geom);
+) PARTITION BY LIST (statefp);
+CREATE INDEX IF NOT EXISTS tiger_place_the_geom_gist ON tiger.place USING gist(the_geom);
+CREATE INDEX IF NOT EXISTS idx_tiger_place_soundex_name ON tiger.place USING btree(@extschema:fuzzystrmatch@.soundex(name));
 
 DROP TABLE IF EXISTS tiger.zip_state;
-DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.zip_state'::regclass) THEN ALTER TABLE tiger.zip_state RENAME TO zip_state_inherited; END IF; END $$;
-CREATE TABLE IF NOT EXISTS tiger.zip_state
-(
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_inherits i JOIN pg_catalog.pg_class pc ON pc.oid = i.inhparent JOIN pg_catalog.pg_namespace pn ON pn.oid = pc.relnamespace WHERE pn.nspname = 'tiger' AND pc.relname = 'zip_state') THEN
+    ALTER TABLE tiger.zip_state RENAME TO zip_state_inherited;
+  END IF;
+END $$;
+CREATE TABLE IF NOT EXISTS tiger.zip_state(
   zip character varying(5) NOT NULL,
   stusps character varying(2) NOT NULL,
   statefp character varying(2),
   CONSTRAINT zip_state_pkey PRIMARY KEY (statefp, zip, stusps)
-) PARTITIONED BY LIST (statefp);
+) PARTITION BY LIST (statefp);
 
 DROP TABLE IF EXISTS tiger.zip_state_loc;
-DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.zip_state_loc'::regclass) THEN ALTER TABLE tiger.zip_state_loc RENAME TO zip_state_loc_inherited; END IF; END $$;
-CREATE TABLE IF NOT EXISTS tiger.zip_state_loc
-(
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_inherits i JOIN pg_catalog.pg_class pc ON pc.oid = i.inhparent JOIN pg_catalog.pg_namespace pn ON pn.oid = pc.relnamespace WHERE pn.nspname = 'tiger' AND pc.relname = 'zip_state_loc') THEN
+    ALTER TABLE tiger.zip_state_loc RENAME TO zip_state_loc_inherited;
+  END IF;
+END $$;
+CREATE TABLE IF NOT EXISTS tiger.zip_state_loc(
   zip character varying(5) NOT NULL,
   stusps character varying(2) NOT NULL,
   statefp character varying(2),
   place varchar(100),
   CONSTRAINT zip_state_loc_pkey PRIMARY KEY (statefp, zip, stusps, place)
-) PARTITIONED BY LIST (statefp);
+) PARTITION BY LIST (statefp);
+CREATE INDEX IF NOT EXISTS idx_tiger_zip_state_loc_place ON tiger.zip_state_loc USING btree(@extschema:fuzzystrmatch@.soundex(place));
 
 DROP TABLE IF EXISTS tiger.cousub;
-DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.cousub'::regclass) THEN ALTER TABLE tiger.cousub RENAME TO cousub_inherited; END IF; END $$;
-CREATE TABLE IF NOT EXISTS tiger.cousub
-(
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_inherits i JOIN pg_catalog.pg_class pc ON pc.oid = i.inhparent JOIN pg_catalog.pg_namespace pn ON pn.oid = pc.relnamespace WHERE pn.nspname = 'tiger' AND pc.relname = 'cousub') THEN
+    ALTER TABLE tiger.cousub RENAME TO cousub_inherited;
+  END IF;
+END $$;
+CREATE TABLE IF NOT EXISTS tiger.cousub(
   gid serial NOT NULL,
   statefp character varying(2) NOT NULL,
   countyfp character varying(3),
@@ -1087,16 +1105,18 @@ CREATE TABLE IF NOT EXISTS tiger.cousub
   intptlat character varying(11),
   intptlon character varying(12),
   the_geom @extschema:postgis@.geometry(MULTIPOLYGON,4269),
-  CONSTRAINT uidx_cousub_gid UNIQUE (gid),
   PRIMARY KEY (statefp, cosbidfp)
-) PARTITIONED BY LIST (statefp);
-
-CREATE INDEX tige_cousub_the_geom_gist ON tiger.cousub USING gist(the_geom);
+) PARTITION BY LIST (statefp);
+CREATE INDEX IF NOT EXISTS tige_cousub_the_geom_gist ON tiger.cousub USING gist(the_geom);
+CREATE INDEX IF NOT EXISTS idx_tiger_cousub_countyfp ON tiger.cousub USING btree(countyfp);
 
 DROP TABLE IF EXISTS tiger.edges;
-DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.edges'::regclass) THEN ALTER TABLE tiger.edges RENAME TO edges_inherited; END IF; END $$;
-CREATE TABLE IF NOT EXISTS tiger.edges
-(
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_inherits i JOIN pg_catalog.pg_class pc ON pc.oid = i.inhparent JOIN pg_catalog.pg_namespace pn ON pn.oid = pc.relnamespace WHERE pn.nspname = 'tiger' AND pc.relname = 'edges') THEN
+    ALTER TABLE tiger.edges RENAME TO edges_inherited;
+  END IF;
+END $$;
+CREATE TABLE IF NOT EXISTS tiger.edges(
   gid SERIAL NOT NULL,
   statefp character varying(2) NOT NULL,
   countyfp character varying(3),
@@ -1131,15 +1151,21 @@ CREATE TABLE IF NOT EXISTS tiger.edges
   tnidt numeric(10),
   the_geom @extschema:postgis@.geometry(MULTILINESTRING,4269),
   PRIMARY KEY (statefp, gid)
-) PARTITIONED BY LIST (statefp);
-CREATE INDEX idx_edges_tlid ON tiger.edges USING btree(tlid);
-CREATE INDEX idx_tiger_edges_countyfp ON tiger.edges USING btree(countyfp);
-CREATE INDEX idx_tiger_edges_the_geom_gist ON tiger.edges USING gist(the_geom);
+) PARTITION BY LIST (statefp);
+CREATE INDEX IF NOT EXISTS idx_edges_tlid ON tiger.edges USING btree(tlid);
+CREATE INDEX IF NOT EXISTS idx_tiger_edges_countyfp ON tiger.edges USING btree(countyfp);
+CREATE INDEX IF NOT EXISTS idx_tiger_edges_the_geom_gist ON tiger.edges USING gist(the_geom);
+CREATE INDEX IF NOT EXISTS idx_edges_tfidl ON tiger.edges USING btree(tfidl);
+CREATE INDEX IF NOT EXISTS idx_edges_tfidr ON tiger.edges USING btree(tfidr);
+CREATE INDEX IF NOT EXISTS idx_edges_zipl ON tiger.edges USING btree(zipl);
 
 DROP TABLE IF EXISTS tiger.addrfeat;
-DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.addrfeat'::regclass) THEN ALTER TABLE tiger.addrfeat RENAME TO addrfeat_inherited; END IF; END $$;
-CREATE TABLE IF NOT EXISTS tiger.addrfeat
-(
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_inherits i JOIN pg_catalog.pg_class pc ON pc.oid = i.inhparent JOIN pg_catalog.pg_namespace pn ON pn.oid = pc.relnamespace WHERE pn.nspname = 'tiger' AND pc.relname = 'addrfeat') THEN
+    ALTER TABLE tiger.addrfeat RENAME TO addrfeat_inherited;
+  END IF;
+END $$;
+CREATE TABLE IF NOT EXISTS tiger.addrfeat(
   gid serial not null,
   tlid bigint,
   statefp character varying(2) NOT NULL,
@@ -1166,17 +1192,20 @@ CREATE TABLE IF NOT EXISTS tiger.addrfeat
   offsetr character varying(1),
   the_geom @extschema:postgis@.geometry(LINESTRING,4329),
   PRIMARY KEY (statefp, gid)
-) PARTITIONED BY LIST (statefp);
-CREATE INDEX idx_addrfeat_geom_gist ON tiger.addrfeat USING gist(the_geom );
-CREATE INDEX idx_addrfeat_tlid ON tiger.addrfeat USING btree(tlid);
-CREATE INDEX idx_addrfeat_zipl ON tiger.addrfeat USING btree(zipl);
-CREATE INDEX idx_addrfeat_zipr ON tiger.addrfeat USING btree(zipr);
+) PARTITION BY LIST (statefp);
+CREATE INDEX IF NOT EXISTS idx_addrfeat_geom_gist ON tiger.addrfeat USING gist(the_geom );
+CREATE INDEX IF NOT EXISTS idx_addrfeat_tlid ON tiger.addrfeat USING btree(tlid);
+CREATE INDEX IF NOT EXISTS idx_addrfeat_zipl ON tiger.addrfeat USING btree(zipl);
+CREATE INDEX IF NOT EXISTS idx_addrfeat_zipr ON tiger.addrfeat USING btree(zipr);
 
 DROP TABLE IF EXISTS tiger.faces;
-DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.faces'::regclass) THEN ALTER TABLE tiger.faces RENAME TO faces_inherited; END IF; END $$;
-CREATE TABLE IF NOT EXISTS tiger.faces
-(
-gid serial NOT NULL,
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_inherits i JOIN pg_catalog.pg_class pc ON pc.oid = i.inhparent JOIN pg_catalog.pg_namespace pn ON pn.oid = pc.relnamespace WHERE pn.nspname = 'tiger' AND pc.relname = 'faces') THEN
+    ALTER TABLE tiger.faces RENAME TO faces_inherited;
+  END IF;
+END $$;
+CREATE TABLE IF NOT EXISTS tiger.faces(
+  gid serial NOT NULL,
   tfid numeric(10,0),
   statefp00 varchar(2),
   countyfp00 varchar(3),
@@ -1247,15 +1276,18 @@ gid serial NOT NULL,
   intptlon varchar(12),
   the_geom @extschema:postgis@.geometry(MULTIPOLYGON,4269),
   PRIMARY KEY (statefp, gid)
-) PARTITIONED BY LIST (statefp);
-CREATE INDEX idx_tiger_faces_tfid ON tiger.faces USING btree (tfid);
-CREATE INDEX idx_tiger_faces_countyfp ON tiger.faces USING btree(countyfp);
-CREATE INDEX tiger_faces_the_geom_gist ON tiger.faces USING gist(the_geom);
+) PARTITION BY LIST (statefp);
+CREATE INDEX IF NOT EXISTS idx_tiger_faces_tfid ON tiger.faces USING btree (tfid);
+CREATE INDEX IF NOT EXISTS idx_tiger_faces_countyfp ON tiger.faces USING btree(countyfp);
+CREATE INDEX IF NOT EXISTS tiger_faces_the_geom_gist ON tiger.faces USING gist(the_geom);
 
 DROP TABLE IF EXISTS tiger.featnames;
-DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.featnames'::regclass) THEN ALTER TABLE tiger.featnames RENAME TO featnames_inherited; END IF; END $$;
-CREATE TABLE IF NOT EXISTS tiger.featnames
-(
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_inherits i JOIN pg_catalog.pg_class pc ON pc.oid = i.inhparent JOIN pg_catalog.pg_namespace pn ON pn.oid = pc.relnamespace WHERE pn.nspname = 'tiger' AND pc.relname = 'featnames') THEN
+    ALTER TABLE tiger.featnames RENAME TO featnames_inherited;
+  END IF;
+END $$;
+CREATE TABLE IF NOT EXISTS tiger.featnames(
   gid SERIAL NOT NULL,
   statefp character varying(2) NOT NULL,
   tlid bigint,
@@ -1277,13 +1309,12 @@ CREATE TABLE IF NOT EXISTS tiger.featnames
   mtfcc character varying(5),
   paflag character varying(1),
   CONSTRAINT featnames_pkey PRIMARY KEY (statefp, gid)
-) PARTITIONED BY LIST (statefp);
-CREATE INDEX idx_tiger_featnames_snd_name ON tiger.featnames USING btree ( @extschema:fuzzystrmatch@.soundex(name) );
-CREATE INDEX idx_tiger_featnames_lname ON tiger.featnames USING btree (lower(name));
-CREATE INDEX idx_tiger_featnames_tlid_statefp ON tiger.featnames USING btree (tlid,statefp);
+) PARTITION BY LIST (statefp);
+CREATE INDEX IF NOT EXISTS idx_tiger_featnames_snd_name ON tiger.featnames USING btree ( @extschema:fuzzystrmatch@.soundex(name) );
+CREATE INDEX IF NOT EXISTS idx_tiger_featnames_lname ON tiger.featnames USING btree (lower(name));
+CREATE INDEX IF NOT EXISTS idx_tiger_featnames_tlid_statefp ON tiger.featnames USING btree (tlid,statefp);
 
-CREATE TABLE IF NOT EXISTS tiger.addr
-(
+CREATE TABLE IF NOT EXISTS tiger.addr(
   gid SERIAL NOT NULL,
   statefp character varying(2) NOT NULL,
   tlid bigint,
@@ -1299,10 +1330,12 @@ CREATE TABLE IF NOT EXISTS tiger.addr
   arid character varying(22),
   mtfcc character varying(5),
   CONSTRAINT addr_pkey PRIMARY KEY (statefp, gid)
-) PARTITIONED BY LIST (statefp);
+) PARTITION BY LIST (statefp);
 
-CREATE INDEX idx_tiger_addr_tlid_statefp ON tiger.addr USING btree(tlid,statefp);
-CREATE INDEX idx_tiger_addr_zip ON tiger.addr USING btree (zip);
+CREATE INDEX IF NOT EXISTS idx_tiger_addr_tlid_statefp ON tiger.addr USING btree(tlid,statefp);
+CREATE INDEX IF NOT EXISTS idx_tiger_addr_zip ON tiger.addr USING btree (zip);
+
+-- least_hn index moved to other_helper_functions.sql (after function definition)
 
 --DROP TABLE IF EXISTS tiger.zcta5;
 CREATE TABLE tiger.zcta5
