@@ -916,14 +916,15 @@ INSERT INTO tiger.zip_lookup_all
   GROUP BY zip, st_code, state, co_code, county, cs_code, countysub, pl_code, place;
 **/
 DROP TABLE IF EXISTS tiger.zip_lookup_base;
-CREATE TABLE tiger.zip_lookup_base (
-    zip     varchar(5),
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.zip_lookup_base'::regclass) THEN ALTER TABLE tiger.zip_lookup_base RENAME TO zip_lookup_base_inherited; END IF; END $$;
+CREATE TABLE IF NOT EXISTS tiger.zip_lookup_base (
+    zip     varchar(5) NOT NULL,
     state   VARCHAR(40),
     county  VARCHAR(90),
     city    VARCHAR(90),
     statefp varchar(2),
-    PRIMARY KEY (zip)
-);
+    PRIMARY KEY (statefp, zip)
+) PARTITIONED BY LIST (statefp);
 
 -- INSERT INTO tiger.zip_lookup_base
 -- Populate through magic
@@ -1014,13 +1015,14 @@ CREATE TABLE tiger.state
 CREATE INDEX idx_tiger_state_the_geom_gist ON tiger.state USING gist(the_geom);
 
 DROP TABLE IF EXISTS tiger.place;
-CREATE TABLE tiger.place
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.place'::regclass) THEN ALTER TABLE tiger.place RENAME TO place_inherited; END IF; END $$;
+CREATE TABLE IF NOT EXISTS tiger.place
 (
   gid serial NOT NULL,
-  statefp character varying(2),
+  statefp character varying(2) NOT NULL,
   placefp character varying(5),
   placens character varying(8),
-  plcidfp character varying(7) PRIMARY KEY,
+  plcidfp character varying(7) NOT NULL,
   "name" character varying(100),
   namelsad character varying(100),
   lsad character varying(2),
@@ -1035,38 +1037,42 @@ CREATE TABLE tiger.place
   intptlat character varying(11),
   intptlon character varying(12),
   the_geom @extschema:postgis@.geometry(MULTIPOLYGON,4269),
-  CONSTRAINT uidx_tiger_place_gid UNIQUE (gid)
-);
+  CONSTRAINT uidx_tiger_place_gid UNIQUE (gid),
+  PRIMARY KEY (statefp, plcidfp)
+) PARTITIONED BY LIST (statefp);
 CREATE INDEX tiger_place_the_geom_gist ON tiger.place USING gist(the_geom);
 
 DROP TABLE IF EXISTS tiger.zip_state;
-CREATE TABLE tiger.zip_state
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.zip_state'::regclass) THEN ALTER TABLE tiger.zip_state RENAME TO zip_state_inherited; END IF; END $$;
+CREATE TABLE IF NOT EXISTS tiger.zip_state
 (
   zip character varying(5) NOT NULL,
   stusps character varying(2) NOT NULL,
   statefp character varying(2),
-  CONSTRAINT zip_state_pkey PRIMARY KEY (zip, stusps)
-);
+  CONSTRAINT zip_state_pkey PRIMARY KEY (statefp, zip, stusps)
+) PARTITIONED BY LIST (statefp);
 
 DROP TABLE IF EXISTS tiger.zip_state_loc;
-CREATE TABLE tiger.zip_state_loc
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.zip_state_loc'::regclass) THEN ALTER TABLE tiger.zip_state_loc RENAME TO zip_state_loc_inherited; END IF; END $$;
+CREATE TABLE IF NOT EXISTS tiger.zip_state_loc
 (
   zip character varying(5) NOT NULL,
   stusps character varying(2) NOT NULL,
   statefp character varying(2),
   place varchar(100),
-  CONSTRAINT zip_state_loc_pkey PRIMARY KEY (zip, stusps, place)
-);
+  CONSTRAINT zip_state_loc_pkey PRIMARY KEY (statefp, zip, stusps, place)
+) PARTITIONED BY LIST (statefp);
 
 DROP TABLE IF EXISTS tiger.cousub;
-CREATE TABLE tiger.cousub
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.cousub'::regclass) THEN ALTER TABLE tiger.cousub RENAME TO cousub_inherited; END IF; END $$;
+CREATE TABLE IF NOT EXISTS tiger.cousub
 (
   gid serial NOT NULL,
-  statefp character varying(2),
+  statefp character varying(2) NOT NULL,
   countyfp character varying(3),
   cousubfp character varying(5),
   cousubns character varying(8),
-  cosbidfp character varying(10) NOT NULL PRIMARY KEY,
+  cosbidfp character varying(10) NOT NULL,
   "name" character varying(100),
   namelsad character varying(100),
   lsad character varying(2),
@@ -1081,16 +1087,18 @@ CREATE TABLE tiger.cousub
   intptlat character varying(11),
   intptlon character varying(12),
   the_geom @extschema:postgis@.geometry(MULTIPOLYGON,4269),
-  CONSTRAINT uidx_cousub_gid UNIQUE (gid)
-);
+  CONSTRAINT uidx_cousub_gid UNIQUE (gid),
+  PRIMARY KEY (statefp, cosbidfp)
+) PARTITIONED BY LIST (statefp);
 
 CREATE INDEX tige_cousub_the_geom_gist ON tiger.cousub USING gist(the_geom);
 
 DROP TABLE IF EXISTS tiger.edges;
-CREATE TABLE tiger.edges
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.edges'::regclass) THEN ALTER TABLE tiger.edges RENAME TO edges_inherited; END IF; END $$;
+CREATE TABLE IF NOT EXISTS tiger.edges
 (
-  gid SERIAL NOT NULL  PRIMARY KEY,
-  statefp character varying(2),
+  gid SERIAL NOT NULL,
+  statefp character varying(2) NOT NULL,
   countyfp character varying(3),
   tlid bigint,
   tfidl numeric(10),
@@ -1121,16 +1129,18 @@ CREATE TABLE tiger.edges
   offsetr character varying(1),
   tnidf numeric(10),
   tnidt numeric(10),
-  the_geom @extschema:postgis@.geometry(MULTILINESTRING,4269)
-);
+  the_geom @extschema:postgis@.geometry(MULTILINESTRING,4269),
+  PRIMARY KEY (statefp, gid)
+) PARTITIONED BY LIST (statefp);
 CREATE INDEX idx_edges_tlid ON tiger.edges USING btree(tlid);
 CREATE INDEX idx_tiger_edges_countyfp ON tiger.edges USING btree(countyfp);
 CREATE INDEX idx_tiger_edges_the_geom_gist ON tiger.edges USING gist(the_geom);
 
 DROP TABLE IF EXISTS tiger.addrfeat;
-CREATE TABLE tiger.addrfeat
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.addrfeat'::regclass) THEN ALTER TABLE tiger.addrfeat RENAME TO addrfeat_inherited; END IF; END $$;
+CREATE TABLE IF NOT EXISTS tiger.addrfeat
 (
-  gid serial not null primary key,
+  gid serial not null,
   tlid bigint,
   statefp character varying(2) NOT NULL,
   aridl character varying(22),
@@ -1154,17 +1164,19 @@ CREATE TABLE tiger.addrfeat
   rtotyp character varying(1),
   offsetl character varying(1),
   offsetr character varying(1),
-  the_geom @extschema:postgis@.geometry(LINESTRING,4329)
-);
+  the_geom @extschema:postgis@.geometry(LINESTRING,4329),
+  PRIMARY KEY (statefp, gid)
+) PARTITIONED BY LIST (statefp);
 CREATE INDEX idx_addrfeat_geom_gist ON tiger.addrfeat USING gist(the_geom );
 CREATE INDEX idx_addrfeat_tlid ON tiger.addrfeat USING btree(tlid);
 CREATE INDEX idx_addrfeat_zipl ON tiger.addrfeat USING btree(zipl);
 CREATE INDEX idx_addrfeat_zipr ON tiger.addrfeat USING btree(zipr);
 
 DROP TABLE IF EXISTS tiger.faces;
-CREATE TABLE tiger.faces
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.faces'::regclass) THEN ALTER TABLE tiger.faces RENAME TO faces_inherited; END IF; END $$;
+CREATE TABLE IF NOT EXISTS tiger.faces
 (
-gid serial NOT NULL PRIMARY KEY,
+gid serial NOT NULL,
   tfid numeric(10,0),
   statefp00 varchar(2),
   countyfp00 varchar(3),
@@ -1233,16 +1245,19 @@ gid serial NOT NULL PRIMARY KEY,
   atotal double precision,
   intptlat varchar(11),
   intptlon varchar(12),
-  the_geom @extschema:postgis@.geometry(MULTIPOLYGON,4269)
-);
+  the_geom @extschema:postgis@.geometry(MULTIPOLYGON,4269),
+  PRIMARY KEY (statefp, gid)
+) PARTITIONED BY LIST (statefp);
 CREATE INDEX idx_tiger_faces_tfid ON tiger.faces USING btree (tfid);
 CREATE INDEX idx_tiger_faces_countyfp ON tiger.faces USING btree(countyfp);
 CREATE INDEX tiger_faces_the_geom_gist ON tiger.faces USING gist(the_geom);
 
 DROP TABLE IF EXISTS tiger.featnames;
-CREATE TABLE tiger.featnames
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_inherits WHERE inhparent = 'tiger.featnames'::regclass) THEN ALTER TABLE tiger.featnames RENAME TO featnames_inherited; END IF; END $$;
+CREATE TABLE IF NOT EXISTS tiger.featnames
 (
   gid SERIAL NOT NULL,
+  statefp character varying(2) NOT NULL,
   tlid bigint,
   fullname character varying(100),
   "name" character varying(100),
@@ -1261,16 +1276,16 @@ CREATE TABLE tiger.featnames
   linearid character varying(22),
   mtfcc character varying(5),
   paflag character varying(1),
-  CONSTRAINT featnames_pkey PRIMARY KEY (gid)
-);
-ALTER TABLE tiger.featnames ADD COLUMN statefp character varying(2);
+  CONSTRAINT featnames_pkey PRIMARY KEY (statefp, gid)
+) PARTITIONED BY LIST (statefp);
 CREATE INDEX idx_tiger_featnames_snd_name ON tiger.featnames USING btree ( @extschema:fuzzystrmatch@.soundex(name) );
 CREATE INDEX idx_tiger_featnames_lname ON tiger.featnames USING btree (lower(name));
 CREATE INDEX idx_tiger_featnames_tlid_statefp ON tiger.featnames USING btree (tlid,statefp);
 
-CREATE TABLE tiger.addr
+CREATE TABLE IF NOT EXISTS tiger.addr
 (
   gid SERIAL NOT NULL,
+  statefp character varying(2) NOT NULL,
   tlid bigint,
   fromhn character varying(12),
   tohn character varying(12),
@@ -1283,9 +1298,8 @@ CREATE TABLE tiger.addr
   toarmid integer,
   arid character varying(22),
   mtfcc character varying(5),
-  CONSTRAINT addr_pkey PRIMARY KEY (gid)
-);
-ALTER TABLE tiger.addr ADD COLUMN statefp character varying(2);
+  CONSTRAINT addr_pkey PRIMARY KEY (statefp, gid)
+) PARTITIONED BY LIST (statefp);
 
 CREATE INDEX idx_tiger_addr_tlid_statefp ON tiger.addr USING btree(tlid,statefp);
 CREATE INDEX idx_tiger_addr_zip ON tiger.addr USING btree (zip);

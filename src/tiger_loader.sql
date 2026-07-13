@@ -32,11 +32,11 @@ $$
 
 CREATE TABLE IF NOT EXISTS tiger.tabblock20
 (
-    statefp character varying(2) ,
+    statefp character varying(2) NOT NULL,
     countyfp character varying(3) ,
     tractce character varying(6) ,
     blockce character varying(4) ,
-    geoid character varying(15) ,
+    geoid character varying(15) NOT NULL,
     name character varying(10) ,
     mtfcc character varying(5) ,
     ur character varying(1) ,
@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS tiger.tabblock20
     intptlat character varying(11) ,
     intptlon character varying(12) ,
     the_geom geometry(MultiPolygon,4269), housing float, pop float,
-    CONSTRAINT pk_tabblock20 PRIMARY KEY (geoid)
-);
+    PRIMARY KEY (statefp, geoid)
+) PARTITIONED BY LIST (statefp);
 
 ALTER TABLE tiger.faces ADD IF NOT EXISTS tractce20 varchar(6);
 ALTER TABLE tiger.faces ADD IF NOT EXISTS blkgrpce20 varchar(1);
@@ -185,26 +185,20 @@ COMMENT ON COLUMN tiger.loader_lookuptables.website_root_override IS 'Path to us
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, single_geom_mode, insert_mode, pre_load_process, post_load_process, columns_exclude )
 VALUES(10, 'tract', 'tract', true, false, true,false, 'c',
-'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name}(CONSTRAINT pk_${state_abbrev}_${lookup_name} PRIMARY KEY (tract_id) ) INHERITS(tiger.${lookup_name}); " ',
+'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name} PARTITION OF tiger.${lookup_name} FOR VALUES IN (''${state_fips}''); " ',
 	'${psql} -c "ALTER TABLE ${staging_schema}.${state_abbrev}_${table_name} RENAME geoid TO tract_id; SELECT loader_load_staged_data(lower(''${state_abbrev}_${table_name}''), lower(''${state_abbrev}_${lookup_name}'')); "
-	${psql} -c "CREATE INDEX ${data_schema}_${state_abbrev}_${lookup_name}_the_geom_gist ON ${data_schema}.${state_abbrev}_${lookup_name} USING gist(the_geom);"
-	${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"
-	${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"', ARRAY['gid', 'geoidfq']);
+	${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"', ARRAY['gid', 'geoidfq']);
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, single_geom_mode, insert_mode, pre_load_process, post_load_process, columns_exclude )
 VALUES(11, 'tabblock20', 'tabblock20', true, false, true,false, 'c',
-'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name}(CONSTRAINT pk_${state_abbrev}_${lookup_name} PRIMARY KEY (geoid)) INHERITS(tiger.${lookup_name});" ',
+'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name} PARTITION OF tiger.${lookup_name} FOR VALUES IN (''${state_fips}''); " ',
 '${psql} -c "SELECT loader_load_staged_data(lower(''${state_abbrev}_${table_name}''), lower(''${state_abbrev}_${lookup_name}'')); "
-${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-${psql} -c "CREATE INDEX ${data_schema}_${state_abbrev}_${lookup_name}_the_geom_gist ON ${data_schema}.${state_abbrev}_${lookup_name} USING gist(the_geom);"
 ${psql} -c "vacuum analyze ${data_schema}.${state_abbrev}_${lookup_name};"', '{gid, geoidfq20, uatype}'::text[]);
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, single_geom_mode, insert_mode, pre_load_process, post_load_process, columns_exclude )
 VALUES(12, 'bg', 'bg', false,false, true,false, 'c',
-'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name}(CONSTRAINT pk_${state_abbrev}_${lookup_name} PRIMARY KEY (bg_id)) INHERITS(tiger.${lookup_name});" ',
+'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name} PARTITION OF tiger.${lookup_name} FOR VALUES IN (''${state_fips}''); " ',
 '${psql} -c "ALTER TABLE ${staging_schema}.${state_abbrev}_${table_name} RENAME geoid TO bg_id;  SELECT loader_load_staged_data(lower(''${state_abbrev}_${table_name}''), lower(''${state_abbrev}_${lookup_name}'')); "
-${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-${psql} -c "CREATE INDEX ${data_schema}_${state_abbrev}_${lookup_name}_the_geom_gist ON ${data_schema}.${state_abbrev}_${lookup_name} USING gist(the_geom);"
 ${psql} -c "vacuum analyze ${data_schema}.${state_abbrev}_${lookup_name};"', ARRAY['gid', 'geoidfq']);
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state,  level_nation, single_geom_mode, pre_load_process, post_load_process)
@@ -227,19 +221,16 @@ VALUES(1, 'state_all', 'state', true, false, false,true,false, 'c',
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, single_geom_mode, insert_mode, pre_load_process, post_load_process )
 VALUES(3, 'place', 'place', true, false, true,false, 'c',
-	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name}(CONSTRAINT pk_${state_abbrev}_${table_name} PRIMARY KEY (plcidfp) ) INHERITS(tiger.place);" ',
+	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name} PARTITION OF tiger.place FOR VALUES IN (''${state_fips}'');" ',
 	'${psql} -c "ALTER TABLE ${staging_schema}.${state_abbrev}_${table_name} RENAME geoid TO plcidfp;SELECT loader_load_staged_data(lower(''${state_abbrev}_${table_name}''), lower(''${state_abbrev}_${lookup_name}'')); ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ADD CONSTRAINT uidx_${state_abbrev}_${lookup_name}_gid UNIQUE (gid);"
-${psql} -c "CREATE INDEX idx_${state_abbrev}_${lookup_name}_soundex_name ON ${data_schema}.${state_abbrev}_${lookup_name} USING btree (soundex(name));"
-${psql} -c "CREATE INDEX ${data_schema}_${state_abbrev}_${lookup_name}_the_geom_gist ON ${data_schema}.${state_abbrev}_${lookup_name} USING gist(the_geom);"
-${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"'
+${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"'
 	);
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, single_geom_mode, insert_mode, pre_load_process, post_load_process )
 VALUES(4, 'cousub', 'cousub', true, false, true,false, 'c',
-	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name}(CONSTRAINT pk_${state_abbrev}_${lookup_name} PRIMARY KEY (cosbidfp), CONSTRAINT uidx_${state_abbrev}_${lookup_name}_gid UNIQUE (gid)) INHERITS(tiger.${lookup_name});" ',
-	'${psql} -c "ALTER TABLE ${staging_schema}.${state_abbrev}_${table_name} RENAME geoid TO cosbidfp;SELECT loader_load_staged_data(lower(''${state_abbrev}_${table_name}''), lower(''${state_abbrev}_${lookup_name}'')); ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-${psql} -c "CREATE INDEX ${data_schema}_${state_abbrev}_${lookup_name}_the_geom_gist ON ${data_schema}.${state_abbrev}_${lookup_name} USING gist(the_geom);"
-${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}_countyfp ON ${data_schema}.${state_abbrev}_${lookup_name} USING btree(countyfp);"');
+	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name} PARTITION OF tiger.${lookup_name} FOR VALUES IN (''${state_fips}'');" ',
+	'${psql} -c "ALTER TABLE ${staging_schema}.${state_abbrev}_${table_name} RENAME geoid TO cosbidfp;SELECT loader_load_staged_data(lower(''${state_abbrev}_${table_name}''), lower(''${state_abbrev}_${lookup_name}''));"
+${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"');
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, level_nation, single_geom_mode, insert_mode, pre_load_process, post_load_process, columns_exclude )
 VALUES(13, 'zcta5_raw', 'zcta520', false,false, false,true, false, 'c',
@@ -252,12 +243,8 @@ ${psql} -c "INSERT INTO ${data_schema}.zcta5_all(statefp, zcta5ce, classfp, mtfc
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, single_geom_mode, insert_mode, pre_load_process, post_load_process, columns_exclude )
 VALUES(6, 'faces', 'faces', true, true, false,false, 'c',
-	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${table_name}(CONSTRAINT pk_${state_abbrev}_${lookup_name} PRIMARY KEY (gid)) INHERITS(tiger.${lookup_name});" ',
-	'${psql} -c "CREATE INDEX ${data_schema}_${state_abbrev}_${table_name}_the_geom_gist ON ${data_schema}.${state_abbrev}_${lookup_name} USING gist(the_geom);"
-	${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}_tfid ON ${data_schema}.${state_abbrev}_${lookup_name} USING btree (tfid);"
-	${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${table_name}_countyfp ON ${data_schema}.${state_abbrev}_${table_name} USING btree (countyfp);"
-	${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-	${psql} -c "vacuum analyze ${data_schema}.${state_abbrev}_${lookup_name};"', ARRAY['gid', 'geoid','geoidfq', 'cpi','suffix1ce', 'statefp00', 'statefp10', 'countyfp00','countyfp10'
+	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${table_name} PARTITION OF tiger.${lookup_name} FOR VALUES IN (''${state_fips}'');" ',
+	'${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"', ARRAY['gid', 'geoid','geoidfq', 'cpi','suffix1ce', 'statefp00', 'statefp10', 'countyfp00','countyfp10'
    ,'tractce00','tractce10', 'blkgrpce00', 'blkgrpce10', 'blockce00', 'blockce10'
       , 'cousubfp00', 'submcdfp00', 'conctyfp00', 'placefp00', 'aiannhfp00', 'aiannhce00',
        'comptyp00', 'trsubfp00', 'trsubce00', 'anrcfp00', 'elsdlea00', 'scsdlea00',
@@ -265,51 +252,31 @@ VALUES(6, 'faces', 'faces', true, true, false,false, 'c',
        'tazce00', 'ugace00', 'puma5ce00','vtdst10','tazce10','uace10','puma5ce10','tazce', 'uace', 'vtdst',  'zcta5ce10', 'puma5ce', 'ugace10','pumace10', 'estatefp', 'ugace', 'blockce', 'pumace20', 'sdadmlea', 'uace20', 'cnectafp', 'nctadvfp','nectafp']);
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, single_geom_mode, insert_mode, pre_load_process, post_load_process, columns_exclude )
 VALUES(7, 'featnames', 'featnames', true, true, false,false, 'a',
-'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${table_name}(CONSTRAINT pk_${state_abbrev}_${table_name} PRIMARY KEY (gid)) INHERITS(tiger.${table_name});ALTER TABLE ${data_schema}.${state_abbrev}_${table_name} ALTER COLUMN statefp SET DEFAULT ''${state_fips}'';" ',
-'${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}_snd_name ON ${data_schema}.${state_abbrev}_${table_name} USING btree (soundex(name));"
-${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}_lname ON ${data_schema}.${state_abbrev}_${table_name} USING btree (lower(name));"
-${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}_tlid_statefp ON ${data_schema}.${state_abbrev}_${table_name} USING btree (tlid,statefp);"
-${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-${psql} -c "vacuum analyze ${data_schema}.${state_abbrev}_${lookup_name};"', ARRAY['gid','statefp', 'geoidfq']);
+'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${table_name} PARTITION OF tiger.${table_name} FOR VALUES IN (''${state_fips}'');" ',
+'${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"', ARRAY['gid','statefp', 'geoidfq']);
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, single_geom_mode, insert_mode, pre_load_process, post_load_process, columns_exclude )
 VALUES(8, 'edges', 'edges', true, true, false,false, 'a',
-'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${table_name}(CONSTRAINT pk_${state_abbrev}_${table_name} PRIMARY KEY (gid)) INHERITS(tiger.${table_name});"',
-'${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_${table_name} ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}_tlid ON ${data_schema}.${state_abbrev}_${table_name} USING btree (tlid);"
-${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}tfidr ON ${data_schema}.${state_abbrev}_${table_name} USING btree (tfidr);"
-${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}_tfidl ON ${data_schema}.${state_abbrev}_${table_name} USING btree (tfidl);"
-${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}_countyfp ON ${data_schema}.${state_abbrev}_${table_name} USING btree (countyfp);"
-${psql} -c "CREATE INDEX ${data_schema}_${state_abbrev}_${table_name}_the_geom_gist ON ${data_schema}.${state_abbrev}_${table_name} USING gist(the_geom);"
-${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}_zipl ON ${data_schema}.${state_abbrev}_${lookup_name} USING btree (zipl);"
-${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_zip_state_loc(CONSTRAINT pk_${state_abbrev}_zip_state_loc PRIMARY KEY(zip,stusps,place)) INHERITS(tiger.zip_state_loc);"
+'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${table_name} PARTITION OF tiger.${table_name} FOR VALUES IN (''${state_fips}'');"',
+'${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"
+${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_zip_state_loc PARTITION OF tiger.zip_state_loc FOR VALUES IN (''${state_fips}'');"
 ${psql} -c "INSERT INTO ${data_schema}.${state_abbrev}_zip_state_loc(zip,stusps,statefp,place) SELECT DISTINCT e.zipl, ''${state_abbrev}'', ''${state_fips}'', p.name FROM ${data_schema}.${state_abbrev}_edges AS e INNER JOIN ${data_schema}.${state_abbrev}_faces AS f ON (e.tfidl = f.tfid OR e.tfidr = f.tfid) INNER JOIN ${data_schema}.${state_abbrev}_place As p ON(f.statefp = p.statefp AND f.placefp = p.placefp ) WHERE e.zipl IS NOT NULL;"
-${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_zip_state_loc_place ON ${data_schema}.${state_abbrev}_zip_state_loc USING btree(soundex(place));"
-${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_zip_state_loc ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-${psql} -c "vacuum analyze ${data_schema}.${state_abbrev}_${lookup_name};"
-${psql} -c "vacuum analyze ${data_schema}.${state_abbrev}_zip_state_loc;"
-${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_zip_lookup_base(CONSTRAINT pk_${state_abbrev}_zip_state_loc_city PRIMARY KEY(zip,state, county, city, statefp)) INHERITS(tiger.zip_lookup_base);"
-${psql} -c "INSERT INTO ${data_schema}.${state_abbrev}_zip_lookup_base(zip,state,county,city, statefp) SELECT DISTINCT e.zipl, ''${state_abbrev}'', c.name,p.name,''${state_fips}''  FROM ${data_schema}.${state_abbrev}_edges AS e INNER JOIN tiger.county As c  ON (e.countyfp = c.countyfp AND e.statefp = c.statefp AND e.statefp = ''${state_fips}'') INNER JOIN ${data_schema}.${state_abbrev}_faces AS f ON (e.tfidl = f.tfid OR e.tfidr = f.tfid) INNER JOIN ${data_schema}.${state_abbrev}_place As p ON(f.statefp = p.statefp AND f.placefp = p.placefp ) WHERE e.zipl IS NOT NULL;"
-${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_zip_lookup_base ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_zip_lookup_base_citysnd ON ${data_schema}.${state_abbrev}_zip_lookup_base USING btree(soundex(city));"',  ARRAY['gid', 'geoid', 'geoidfq', 'divroad'] );
+${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_zip_state_loc;"
+${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_zip_lookup_base PARTITION OF tiger.zip_lookup_base FOR VALUES IN (''${state_fips}'');"
+${psql} -c "INSERT INTO ${data_schema}.${state_abbrev}_zip_lookup_base(zip,state,county,city, statefp) SELECT DISTINCT e.zipl, ''${state_abbrev}'', c.name,p.name,''${state_fips}''  FROM ${data_schema}.${state_abbrev}_edges AS e INNER JOIN tiger.county As c  ON (e.countyfp = c.countyfp AND e.statefp = c.statefp AND e.statefp = ''${state_fips}'') INNER JOIN ${data_schema}.${state_abbrev}_faces AS f ON (e.tfidl = f.tfid OR e.tfidr = f.tfid) INNER JOIN ${data_schema}.${state_abbrev}_place As p ON(f.statefp = p.statefp AND f.placefp = p.placefp ) WHERE e.zipl IS NOT NULL;"',  ARRAY['gid', 'geoid', 'geoidfq', 'divroad'] );
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, single_geom_mode, insert_mode, pre_load_process, post_load_process,columns_exclude )
 VALUES(9, 'addr', 'addr', true, true, false,false, 'a',
-	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name}(CONSTRAINT pk_${state_abbrev}_${table_name} PRIMARY KEY (gid)) INHERITS(tiger.${table_name});ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ALTER COLUMN statefp SET DEFAULT ''${state_fips}'';" ',
-	'${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-	${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${lookup_name}_least_address ON tiger_data.${state_abbrev}_addr USING btree (least_hn(fromhn,tohn) );"
-	${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${table_name}_tlid_statefp ON ${data_schema}.${state_abbrev}_${table_name} USING btree (tlid, statefp);"
-	${psql} -c "CREATE INDEX idx_${data_schema}_${state_abbrev}_${table_name}_zip ON ${data_schema}.${state_abbrev}_${table_name} USING btree (zip);"
-	${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_zip_state(CONSTRAINT pk_${state_abbrev}_zip_state PRIMARY KEY(zip,stusps)) INHERITS(tiger.zip_state); "
+	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name} PARTITION OF tiger.${table_name} FOR VALUES IN (''${state_fips}'');" ',
+	'${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"
+	${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_zip_state PARTITION OF tiger.zip_state FOR VALUES IN (''${state_fips}''); "
 	${psql} -c "INSERT INTO ${data_schema}.${state_abbrev}_zip_state(zip,stusps,statefp) SELECT DISTINCT zip, ''${state_abbrev}'', ''${state_fips}'' FROM ${data_schema}.${state_abbrev}_${lookup_name} WHERE zip is not null;"
-	${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_zip_state ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-	${psql} -c "vacuum analyze ${data_schema}.${state_abbrev}_${lookup_name};"',  ARRAY['gid','geoidfq', 'statefp','fromarmid', 'toarmid']);
+	${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"',  ARRAY['gid','geoidfq', 'statefp','fromarmid', 'toarmid']);
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, single_geom_mode, insert_mode, pre_load_process, post_load_process,columns_exclude )
 VALUES(9, 'addrfeat', 'addrfeat', false, true, false,true, 'a',
-	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name}(CONSTRAINT pk_${state_abbrev}_${table_name} PRIMARY KEY (gid)) INHERITS(tiger.${table_name});ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ALTER COLUMN statefp SET DEFAULT ''${state_fips}'';" ',
-	'${psql} -c "ALTER TABLE ${data_schema}.${state_abbrev}_${lookup_name} ADD CONSTRAINT chk_statefp CHECK (statefp = ''${state_fips}'');"
-	${psql} -c "vacuum analyze ${data_schema}.${state_abbrev}_${lookup_name};"',  ARRAY['gid','statefp','fromarmid', 'toarmid']);
+	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name} PARTITION OF tiger.${table_name} FOR VALUES IN (''${state_fips}'');" ',
+	'${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"',  ARRAY['gid','statefp','fromarmid', 'toarmid']);
 
 CREATE OR REPLACE FUNCTION loader_generate_nation_script(os text)
   RETURNS SETOF text AS
@@ -511,3 +478,69 @@ AND platform.os = $2  -- generate script for selected platform
 ;
 $$
   LANGUAGE sql VOLATILE;
+
+CREATE OR REPLACE FUNCTION tiger.migrate_to_partitions()
+RETURNS void AS
+$$
+DECLARE
+	var_record RECORD;
+	var_partitioned_tables text[] := ARRAY[
+		'edges', 'faces', 'featnames', 'addr', 'addrfeat',
+		'place', 'cousub', 'tract', 'tabblock20', 'bg',
+		'zip_state_loc', 'zip_lookup_base', 'zip_state'
+	];
+	var_table text;
+	var_statefp text;
+BEGIN
+	FOR var_table IN SELECT unnest(var_partitioned_tables) LOOP
+		-- Rename old inherited table if it exists
+		IF EXISTS (
+			SELECT 1 FROM pg_class c
+			JOIN pg_namespace n ON n.oid = c.relnamespace
+			WHERE n.nspname = 'tiger' AND c.relname = var_table
+			  AND c.relkind = 'r'
+		) THEN
+			RAISE NOTICE 'Migrating tiger.% to partitioned table', var_table;
+			EXECUTE format('ALTER TABLE tiger.%I RENAME TO %I', var_table, var_table || '_inherited');
+		END IF;
+
+		-- The partitioned parent should already exist from CREATE TABLE IF NOT EXISTS
+		-- in census_tables.sql / lookup_tables_2011.sql, but create it if missing
+		IF NOT EXISTS (
+			SELECT 1 FROM pg_class c
+			JOIN pg_namespace n ON n.oid = c.relnamespace
+			WHERE n.nspname = 'tiger' AND c.relname = var_table
+			  AND c.relkind = 'p'
+		) THEN
+			RAISE WARNING 'Partitioned parent tiger.% not found - ensure table definitions are installed', var_table;
+			CONTINUE;
+		END IF;
+
+		-- Create partitions for each state that has data in data_schema
+		FOR var_record IN
+			SELECT DISTINCT s.statefp
+			FROM information_schema.tables t
+			JOIN tiger.state s ON true
+			WHERE t.table_schema = 'tiger_data'
+			  AND t.table_name = s.statefp || '_' || var_table
+			  AND NOT EXISTS (
+				  SELECT 1 FROM pg_inherits i
+				  JOIN pg_class parent ON parent.oid = i.inhparent
+				  JOIN pg_class child ON child.oid = i.inhrelid
+				  JOIN pg_namespace pn ON pn.oid = parent.relnamespace
+				  JOIN pg_namespace cn ON cn.oid = child.relnamespace
+				  WHERE pn.nspname = 'tiger' AND parent.relname = var_table
+					AND cn.nspname = 'tiger_data' AND child.relname = s.statefp || '_' || var_table
+			  )
+		LOOP
+			var_statefp := var_record.statefp;
+			RAISE NOTICE 'Creating partition tiger_data.%_% for tiger.%', var_statefp, var_table, var_table;
+			EXECUTE format('CREATE TABLE tiger_data.%I PARTITION OF tiger.%I FOR VALUES IN (%L)',
+				var_statefp || '_' || var_table, var_table, var_statefp);
+		END LOOP;
+	END LOOP;
+
+	RAISE NOTICE 'Migration to partitioned tables complete';
+END;
+$$
+LANGUAGE plpgsql;
