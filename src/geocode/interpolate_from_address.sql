@@ -29,10 +29,10 @@ BEGIN
 	var_addr2 := to_number( CASE WHEN in_addr2 ~ '^[0-9]+$' THEN in_addr2 ELSE '0' END, '999999');
 
     IF geometrytype(in_road) = 'LINESTRING' THEN
-      road := ST_Transform(in_road, utmzone(ST_StartPoint(in_road)) );
+      road := ST_Transform(in_road, tiger.utmzone(ST_StartPoint(in_road)) );
     ELSIF geometrytype(in_road) = 'MULTILINESTRING' THEN
     	road := ST_GeometryN(in_road,1);
-    	road := ST_Transform(road, utmzone(ST_StartPoint(road)) );
+    	road := ST_Transform(road, tiger.utmzone(ST_StartPoint(road)) );
     ELSE
       RETURN NULL;
     END IF;
@@ -94,5 +94,5 @@ END;
 $_$ LANGUAGE plpgsql IMMUTABLE COST 10 PARALLEL SAFE;
 -- needed to ban stupid warning about how we are using deprecated functions
 -- yada yada yada need this to work in 2.0 too bah
-ALTER FUNCTION interpolate_from_address(integer, character varying, character varying, geometry, character varying, double precision)
+ALTER FUNCTION tiger.interpolate_from_address(integer, character varying, character varying, geometry, character varying, double precision)
   SET client_min_messages='ERROR';
