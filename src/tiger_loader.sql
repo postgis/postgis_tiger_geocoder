@@ -12,7 +12,7 @@
 --
 -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 -- SELECT tiger.SetSearchPathForInstall('tiger');
-DROP FUNCTION IF EXISTS create_census_base_tables();
+DROP FUNCTION IF EXISTS tiger.create_census_base_tables();
 
 CREATE OR REPLACE FUNCTION loader_macro_replace(param_input text, param_keys text[],param_values text[])
 RETURNS text AS
@@ -75,7 +75,7 @@ $$
 
 -- Helper function that generates script to drop all nation tables (county, state) in a particular schema
 -- This is useful for loading 2011 because state and county tables aren't broken out into separate state files
-DROP FUNCTION IF EXISTS drop_national_tables_generate_script(text);
+DROP FUNCTION IF EXISTS tiger.drop_national_tables_generate_script(text);
 CREATE OR REPLACE FUNCTION drop_nation_tables_generate_script(param_schema text DEFAULT 'tiger_data')
   RETURNS text AS
 $$
@@ -318,15 +318,15 @@ WITH lu AS (SELECT lookup_name, table_name, pre_load_process,post_load_process, 
     FROM  tiger.loader_lookuptables
 				WHERE level_nation = true AND load = true)
 SELECT
-	loader_macro_replace(
+	tiger.loader_macro_replace(
 		replace(
-			loader_macro_replace(declare_sect
+			tiger.loader_macro_replace(declare_sect
 				, ARRAY['staging_fold', 'website_root', 'psql',  'data_schema', 'staging_schema'],
 				ARRAY[variables.staging_fold, variables.website_root, platform.psql, variables.data_schema, variables.staging_schema]
 			), '/', platform.path_sep) || '
 '  ||
 	-- Nation level files
-	array_to_string( ARRAY(SELECT loader_macro_replace('cd ' || replace(variables.staging_fold,'/', platform.path_sep) || '
+	array_to_string( ARRAY(SELECT tiger.loader_macro_replace('cd ' || replace(variables.staging_fold,'/', platform.path_sep) || '
 ' || platform.wget || ' ' || variables.website_root  || '/'
 
 -- hardcoding zcta5 path since doesn't follow convention
@@ -358,9 +358,9 @@ CREATE OR REPLACE FUNCTION loader_generate_script(param_states text[], os text)
   RETURNS SETOF text AS
 $BODY$
 SELECT
-	loader_macro_replace(
+	tiger.loader_macro_replace(
 		replace(
-			loader_macro_replace(declare_sect
+			tiger.loader_macro_replace(declare_sect
 				, ARRAY['staging_fold', 'state_fold','website_root', 'psql', 'state_abbrev', 'data_schema', 'staging_schema', 'state_fips'],
 				ARRAY[variables.staging_fold, s.state_fold, variables.website_root, platform.psql, s.state_abbrev, variables.data_schema, variables.staging_schema, s.state_fips::text]
 			), '/', platform.path_sep) || '
@@ -371,7 +371,7 @@ SELECT
 '
 || 'cd ' ||  replace(variables.staging_fold,'/', platform.path_sep) || '/' || replace(regexp_replace(COALESCE(lu.website_root_override, variables.website_root || '/' || upper(lookup_name) ), 'http[s]?://', ''),'ftp://','')    || '
 ' || replace(platform.unzip_command, '*.zip', 'tl_' || variables.tiger_year || '_' || s.state_fips || '*_' || table_name || '.zip ') || '
-' ||loader_macro_replace(COALESCE(lu.pre_load_process || E'\n', '') || platform.loader || ' -D -' ||  lu.insert_mode || ' -s 4269 -g the_geom '
+' ||tiger.loader_macro_replace(COALESCE(lu.pre_load_process || E'\n', '') || platform.loader || ' -D -' ||  lu.insert_mode || ' -s 4269 -g the_geom '
 		|| CASE WHEN lu.single_geom_mode THEN ' -S ' ELSE ' ' END::text || ' -W "latin1" tl_' || variables.tiger_year || '_' || s.state_fips
 	|| '_' || lu.table_name || '.dbf tiger_staging.' || lower(s.state_abbrev) || '_' || lu.table_name || ' | '::text || platform.psql
 		|| COALESCE(E'\n' ||
@@ -389,7 +389,7 @@ FROM tiger.county As c
 WHERE c.statefp = s.state_fips), ' ')
 || 'cd ' ||  replace(variables.staging_fold,'/', platform.path_sep) || '/' || replace(regexp_replace(COALESCE(lu.website_root_override,variables.website_root || '/' || upper(lookup_name)  || '/'), 'http[s]?://', ''),'ftp://','')  || '
 ' || replace(platform.unzip_command, '*.zip', 'tl_*_' || s.state_fips || '*_' || table_name || '*.zip ') || '
-' || loader_macro_replace(COALESCE(lu.pre_load_process || E'\n', '') || COALESCE(county_process_command || E'\n','')
+' || tiger.loader_macro_replace(COALESCE(lu.pre_load_process || E'\n', '') || COALESCE(county_process_command || E'\n','')
 				|| COALESCE(E'\n' ||lu.post_load_process , '') , ARRAY['loader','table_name','lookup_name'], ARRAY[platform.loader  || ' -D ' || CASE WHEN lu.single_geom_mode THEN ' -S' ELSE ' ' END::text, lu.table_name, lu.lookup_name ])
 				FROM tiger.loader_lookuptables AS lu
 				WHERE level_county = true AND load = true
@@ -460,11 +460,11 @@ language 'sql' VOLATILE;
 CREATE OR REPLACE FUNCTION loader_generate_census_script(param_states text[], os text)
   RETURNS SETOF text AS
 $$
-SELECT create_census_base_tables();
+SELECT tiger.create_census_base_tables();
 SELECT
-	loader_macro_replace(
+	tiger.loader_macro_replace(
 		replace(
-			loader_macro_replace(declare_sect
+			tiger.loader_macro_replace(declare_sect
 				, ARRAY['staging_fold', 'state_fold','website_root', 'psql', 'state_abbrev', 'data_schema', 'staging_schema', 'state_fips'],
 				ARRAY[variables.staging_fold, s.state_fold, variables.website_root, platform.psql, s.state_abbrev, variables.data_schema, variables.staging_schema, s.state_fips::text]
 			), '/', platform.path_sep) || '
@@ -475,7 +475,7 @@ SELECT
 '
 || 'cd ' ||  replace(variables.staging_fold,'/', platform.path_sep) || '/' || replace(regexp_replace(COALESCE(lu.website_root_override,variables.website_root || '/' || upper(lookup_name) ), 'http[s]+://', ''),'ftp://','')    || '
 ' || replace(platform.unzip_command, '*.zip', 'tl_' || variables.tiger_year || '_' || s.state_fips || '*_' || table_name || '.zip ') || '
-' ||loader_macro_replace(COALESCE(lu.pre_load_process || E'\n', '') || platform.loader || ' -D -' ||  lu.insert_mode || ' -s 4269 -g the_geom '
+' ||tiger.loader_macro_replace(COALESCE(lu.pre_load_process || E'\n', '') || platform.loader || ' -D -' ||  lu.insert_mode || ' -s 4269 -g the_geom '
 		|| CASE WHEN lu.single_geom_mode THEN ' -S ' ELSE ' ' END::text || ' -W "latin1" tl_' || variables.tiger_year || '_' || s.state_fips
 	|| '_' || lu.table_name || '.dbf tiger_staging.' || lower(s.state_abbrev) || '_' || lu.table_name || ' | '::text || platform.psql
 		|| COALESCE(E'\n' ||
@@ -493,7 +493,7 @@ FROM tiger.county As c
 WHERE c.statefp = s.state_fips), ' ')
 || 'cd ' ||  replace(variables.staging_fold,'/', platform.path_sep) || '/' || replace(regexp_replace(COALESCE(lu.website_root_override,variables.website_root || '/' || upper(lookup_name)  || '/'), 'http[s]+://', ''),'ftp://','')  || '
 ' || replace(platform.unzip_command, '*.zip', 'tl_*_' || s.state_fips || '*_' || table_name || '*.zip ') || '
-' || loader_macro_replace(COALESCE(lu.pre_load_process || E'\n', '') || COALESCE(county_process_command || E'\n','')
+' || tiger.loader_macro_replace(COALESCE(lu.pre_load_process || E'\n', '') || COALESCE(county_process_command || E'\n','')
 				|| COALESCE(E'\n' ||lu.post_load_process , '') , ARRAY['loader','table_name','lookup_name'], ARRAY[platform.loader  || ' -D ' || CASE WHEN lu.single_geom_mode THEN ' -S' ELSE ' ' END::text, lu.table_name, lu.lookup_name ])
 				FROM tiger.loader_lookuptables AS lu
 				WHERE level_county = true AND lu.lookup_name IN('bg','tract', 'tabblock')
