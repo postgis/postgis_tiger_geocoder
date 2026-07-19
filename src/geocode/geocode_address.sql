@@ -1,5 +1,5 @@
---DROP FUNCTION IF EXISTS geocode_address(norm_addy, integer , geometry);
-CREATE OR REPLACE FUNCTION geocode_address(IN parsed norm_addy, max_results integer DEFAULT 10, restrict_geom geometry DEFAULT NULL, OUT addy norm_addy, OUT geomout geometry, OUT rating integer)
+--DROP FUNCTION IF EXISTS geocode_address(norm_addy, integer , @extschema:postgis@.geometry);
+CREATE OR REPLACE FUNCTION geocode_address(IN parsed norm_addy, max_results integer DEFAULT 10, restrict_geom @extschema:postgis@.geometry DEFAULT NULL, OUT addy norm_addy, OUT geomout @extschema:postgis@.geometry, OUT rating integer)
   RETURNS SETOF record AS
 $$
 DECLARE
@@ -11,7 +11,7 @@ DECLARE
   var_debug boolean := tiger.get_geocode_setting('debug_geocode_address')::boolean;
   var_sql text := '';
   var_n integer := 0;
-  var_restrict_geom geometry := NULL;
+  var_restrict_geom @extschema:postgis@.geometry := NULL;
   var_bfilter text := null;
   var_bestrating integer := NULL;
   var_zip_penalty numeric := tiger.get_geocode_setting('zip_penalty')::numeric*1.00;
@@ -33,17 +33,17 @@ BEGIN
   END IF;
 
   IF restrict_geom IS NOT NULL THEN
-  		IF ST_SRID(restrict_geom) < 1 OR ST_SRID(restrict_geom) = 4236 THEN
+  		IF @extschema:postgis@.ST_SRID(restrict_geom) < 1 OR @extschema:postgis@.ST_SRID(restrict_geom) = 4236 THEN
   		-- basically has no srid or if wgs84 close enough to NAD 83 -- assume same as data
-  			var_restrict_geom = ST_SetSRID(restrict_geom,4269);
+  			var_restrict_geom = @extschema:postgis@.ST_SetSRID(restrict_geom,4269);
   		ELSE
   		--transform and snap
-  			var_restrict_geom = ST_SnapToGrid(ST_Transform(restrict_geom, 4269), 0.000001);
+  			var_restrict_geom = @extschema:postgis@.ST_SnapToGrid(@extschema:postgis@.ST_Transform(restrict_geom, 4269), 0.000001);
   		END IF;
   END IF;
   var_bfilter := ' SELECT zcta5ce FROM tiger.zcta5 AS zc
                     WHERE zc.statefp = ' || quote_nullable(in_statefp) || '
-                        AND ST_Intersects(zc.the_geom, ' || quote_literal(var_restrict_geom::text) || '::geometry)  ' ;
+                        AND @extschema:postgis@.ST_Intersects(zc.the_geom, ' || quote_literal(var_restrict_geom::text) || '::@extschema:postgis@.geometry)  ' ;
 
   SELECT NULL::varchar[] As zip INTO zip_info;
 
@@ -168,7 +168,7 @@ BEGIN
           || CASE WHEN parsed.location > '' AND zip_info.zip IS NULL THEN ' AND ( lower(p.name) LIKE (lower($3::text) || ''%'')  ) ' ELSE '' END
           || ')
                 WHERE a.statefp = $10  AND  b.statefp = $10   '
-             ||   CASE WHEN var_restrict_geom IS NOT NULL THEN ' AND ST_Intersects(b.the_geom, $8::geometry) '  ELSE '' END
+             ||   CASE WHEN var_restrict_geom IS NOT NULL THEN ' AND @extschema:postgis@.ST_Intersects(b.the_geom, $8::@extschema:postgis@.geometry) '  ELSE '' END
              || '
 
           )   As b
@@ -359,7 +359,7 @@ BEGIN
          || '  LIMIT 200'
          || '    ) AS sub'
          || '  JOIN tiger.edges e ON (' || quote_literal(zip_info.statefp) || ' = e.statefp AND sub.tlid = e.tlid AND e.mtfcc LIKE ''S%'' '
-         ||   CASE WHEN var_restrict_geom IS NOT NULL THEN ' AND ST_Intersects(e.the_geom, $8) '  ELSE '' END || ') '
+         ||   CASE WHEN var_restrict_geom IS NOT NULL THEN ' AND @extschema:postgis@.ST_Intersects(e.the_geom, $8) '  ELSE '' END || ') '
          || '  JOIN tiger.state s ON (' || quote_literal(zip_info.statefp) || ' = s.statefp)'
          || '  JOIN tiger.faces f ON (' || quote_literal(zip_info.statefp) || ' = f.statefp AND (e.tfidl = f.tfid OR e.tfidr = f.tfid))'
          || '  LEFT JOIN tiger.zip_lookup_base zip ON (sub.zip = zip.zip AND zip.statefp=' || quote_literal(zip_info.statefp) || ')'
