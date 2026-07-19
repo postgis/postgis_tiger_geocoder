@@ -12,7 +12,7 @@ CREATE TABLE tiger.tract(
 	awater double precision,
 	intptlat varchar(11),
 	intptlon varchar(12),
-	the_geom geometry(MULTIPOLYGON,4269)
+	the_geom @extschema:postgis@.geometry(MULTIPOLYGON,4269)
 );
 
 
@@ -33,7 +33,7 @@ CREATE TABLE tiger.tabblock
 	awater double precision,
 	intptlat varchar(11),
 	intptlon varchar(12),
-	the_geom geometry(MultiPolygon,4269)
+	the_geom @extschema:postgis@.geometry(MultiPolygon,4269)
 );
 
 
@@ -55,7 +55,7 @@ CREATE TABLE tiger.tabblock20
     awater double precision,
     intptlat character varying(11) ,
     intptlon character varying(12) ,
-    the_geom geometry(MultiPolygon,4269), housing float, pop float,
+    the_geom @extschema:postgis@.geometry(MultiPolygon,4269), housing float, pop float,
     CONSTRAINT pk_tabblock20 PRIMARY KEY (geoid)
 );
 
@@ -76,7 +76,7 @@ CREATE TABLE tiger.bg
 	awater double precision,
 	intptlat varchar(11),
 	intptlon varchar(12),
-	the_geom geometry(MultiPolygon,4269)
+	the_geom @extschema:postgis@.geometry(MultiPolygon,4269)
 );
 COMMENT ON TABLE tiger.bg IS 'block groups';
 
@@ -96,5 +96,5 @@ CREATE TABLE IF NOT EXISTS tiger.tract
 	awater double precision,
 	intptlat varchar(11),
 	intptlon varchar(12),
-	the_geom geometry(MultiPolygon,4269)
+	the_geom @extschema:postgis@.geometry(MultiPolygon,4269)
 );
