@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS tiger.tabblock20
     awater double precision,
     intptlat character varying(11) ,
     intptlon character varying(12) ,
-    the_geom geometry(MultiPolygon,4269), housing float, pop float,
+    the_geom @extschema:postgis@.geometry(MultiPolygon,4269), housing float, pop float,
     CONSTRAINT pk_tabblock20 PRIMARY KEY (geoid)
 );
 
@@ -437,7 +437,7 @@ BEGIN
 	RAISE NOTICE '%', var_sql;
 	EXECUTE (var_sql);
 	GET DIAGNOSTICS var_num_records = ROW_COUNT;
-	SELECT DropGeometryTable(var_staging_schema,param_staging_table) INTO var_temp;
+	SELECT @extschema:postgis@.DropGeometryTable(var_staging_schema,param_staging_table) INTO var_temp;
 	RETURN var_num_records;
 END;
 $$
