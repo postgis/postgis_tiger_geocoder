@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS tiger.tabblock20
     awater double precision,
     intptlat character varying(11) ,
     intptlon character varying(12) ,
-    the_geom geometry(MultiPolygon,4269), housing float, pop float,
+    the_geom @extschema:postgis@.geometry(MultiPolygon,4269), housing float, pop float,
     PRIMARY KEY (statefp, geoid)
 ) PARTITION BY LIST (statefp);
 
@@ -234,10 +234,10 @@ ${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"');
 
 INSERT INTO tiger.loader_lookuptables(process_order, lookup_name, table_name, load, level_county, level_state, level_nation, single_geom_mode, insert_mode, pre_load_process, post_load_process, columns_exclude )
 VALUES(13, 'zcta5_raw', 'zcta520', false,false, false,true, false, 'c',
-	'${psql} -c "CREATE TABLE ${data_schema}.${lookup_name}( zcta5 character varying(5), classfp character varying(2),mtfcc character varying(5), funcstat character varying(1), aland double precision, awater double precision, intptlat character varying(11), intptlon character varying(12), the_geom geometry(MultiPolygon,4269) );"',
+	'${psql} -c "CREATE TABLE ${data_schema}.${lookup_name}( zcta5 character varying(5), classfp character varying(2),mtfcc character varying(5), funcstat character varying(1), aland double precision, awater double precision, intptlat character varying(11), intptlon character varying(12), the_geom @extschema:postgis@.geometry(MultiPolygon,4269) );"',
 $post_load$${psql} -c "ALTER TABLE tiger.zcta5 DROP CONSTRAINT IF EXISTS enforce_geotype_the_geom; CREATE TABLE ${data_schema}.zcta5_all(CONSTRAINT pk_zcta5_all PRIMARY KEY (zcta5ce,statefp), CONSTRAINT uidx_${lookup_name}_all_gid UNIQUE (gid)) INHERITS(tiger.zcta5);"
 ${psql} -c "SELECT loader_load_staged_data(lower('${table_name}'), lower('${lookup_name}'));"
-${psql} -c "INSERT INTO ${data_schema}.zcta5_all(statefp, zcta5ce, classfp, mtfcc, funcstat, aland, awater, intptlat, intptlon, partflg, the_geom) SELECT  s.statefp, z.zcta5,  z.classfp, z.mtfcc, z.funcstat, z.aland, z.awater, z.intptlat, z.intptlon, CASE WHEN ST_Covers(s.the_geom, z.the_geom) THEN 'N' ELSE 'Y' END, ST_Buffer(ST_SnapToGrid(ST_Transform(CASE WHEN ST_Covers(s.the_geom, z.the_geom) THEN ST_SimplifyPreserveTopology(ST_Transform(z.the_geom,2163),1000) ELSE ST_SimplifyPreserveTopology(ST_Intersection(ST_Transform(s.the_geom,2163), ST_Transform(z.the_geom,2163)),1000)  END,4269), 0.000001),0) As geom FROM ${data_schema}.zcta5_raw AS z INNER JOIN tiger.state AS s ON (ST_Covers(s.the_geom, z.the_geom) or ST_Overlaps(s.the_geom, z.the_geom) );"
+${psql} -c "INSERT INTO ${data_schema}.zcta5_all(statefp, zcta5ce, classfp, mtfcc, funcstat, aland, awater, intptlat, intptlon, partflg, the_geom) SELECT  s.statefp, z.zcta5,  z.classfp, z.mtfcc, z.funcstat, z.aland, z.awater, z.intptlat, z.intptlon, CASE WHEN @extschema:postgis@.ST_Covers(s.the_geom, z.the_geom) THEN 'N' ELSE 'Y' END, @extschema:postgis@.ST_Buffer(@extschema:postgis@.ST_SnapToGrid(@extschema:postgis@.ST_Transform(CASE WHEN @extschema:postgis@.ST_Covers(s.the_geom, z.the_geom) THEN @extschema:postgis@.ST_SimplifyPreserveTopology(@extschema:postgis@.ST_Transform(z.the_geom,2163),1000) ELSE @extschema:postgis@.ST_SimplifyPreserveTopology(@extschema:postgis@.ST_Intersection(@extschema:postgis@.ST_Transform(s.the_geom,2163), @extschema:postgis@.ST_Transform(z.the_geom,2163)),1000)  END,4269), 0.000001),0) As geom FROM ${data_schema}.zcta5_raw AS z INNER JOIN tiger.state AS s ON (@extschema:postgis@.ST_Covers(s.the_geom, z.the_geom) or @extschema:postgis@.ST_Overlaps(s.the_geom, z.the_geom) );"
 	${psql} -c "DROP TABLE ${data_schema}.zcta5_raw; CREATE INDEX idx_${data_schema}_zcta5_all_the_geom_gist ON ${data_schema}.zcta5_all USING gist(the_geom);"$post_load$
 , ARRAY['gid','geoid','geoid10', 'geoid20', 'geoidfq20', 'partflg']);
 
@@ -404,7 +404,7 @@ BEGIN
 	RAISE NOTICE '%', var_sql;
 	EXECUTE (var_sql);
 	GET DIAGNOSTICS var_num_records = ROW_COUNT;
-	SELECT DropGeometryTable(var_staging_schema,param_staging_table) INTO var_temp;
+	SELECT @extschema:postgis@.DropGeometryTable(var_staging_schema,param_staging_table) INTO var_temp;
 	RETURN var_num_records;
 END;
 $$
