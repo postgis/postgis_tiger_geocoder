@@ -92,6 +92,20 @@ BEGIN
 
   rawInput := regexp_replace(rawInput, '(^|' || ws || ')SH([0-9])', '\1SH \2', 'gi');
 
+  IF rawInput ~* '^(rt|rte|route)\.?\s+[0-9a-z]+[[:space:]]+(exit|ext\.?)' THEN
+    result.streetTypeAbbrev := 'Rte';
+    result.streetName := substring(rawInput from '(?i)^(?:rt|rte|route)\.?\s+([0-9a-z]+)');
+    result.internal := 'Exit ' || substring(rawInput from '(?i)(?:exit|ext\.?)\s*#?\s*([0-9a-z][-0-9a-z]*)');
+    tempString := tiger.state_extract(rawInput);
+    IF tempString IS NOT NULL THEN
+      result.stateAbbrev := split_part(tempString, ':', 2);
+    END IF;
+    result.zip := COALESCE(substring(rawInput from ws || E'([0-9]{5})$'),
+                           substring(rawInput from ws || '([0-9]{5})-[0-9]{0,4}$'));
+    result.parsed := TRUE;
+    RETURN result;
+  END IF;
+
   IF debug_flag THEN
     raise notice '% input: %', clock_timestamp(), rawInput;
   END IF;

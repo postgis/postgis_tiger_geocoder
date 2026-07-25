@@ -91,6 +91,8 @@ SELECT '#1125d' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_
 SELECT '#1125e' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('I-90,Boston, MA') As addy;
 --broke this one too
 SELECT '#1125f' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('I 90,Boston, MA') As addy;
+SELECT 'GT-5a' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('Rt 6 Exit 20, MA') As addy;
+SELECT 'GT-5b' As ticket, tiger.pprint_addy(addy), addy.* FROM tiger.normalize_address('Route 6 Ext. 20, MA') As addy;
 SELECT '#1599g' As ticket, tiger.pprint_addy(ROW(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,true,NULL,NULL)::tiger.norm_addy);
 
 -- location with prefixes getting caught in post prefix

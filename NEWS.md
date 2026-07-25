@@ -9,6 +9,7 @@ This version requires PostgreSQL 16 and above
 
 ## Bug Fixes and Enhancements
 
+- [GT-5](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues/5), [GT-51](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/51),  Normalize route exit addresses (Darafei Praliaskouski)
 - [GT-57](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/57) Skip soundex matching for numeric street names in the fallback search (Tag Spilman)
 - [GT-58](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/58) Make least_hn, greatest_hn, and diff_zip inlinable (Tag Spilman)
 
