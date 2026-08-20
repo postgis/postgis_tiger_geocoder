@@ -11,48 +11,22 @@ clone:
 
 steps:
 
-  build-package:
+  release:
     image: *test-image
     commands:
-      - >-
-        for PGVER in 16 17 18 19; do
-        export PATH=/usr/lib/postgresql/$${PGVER}/bin:$${PATH};
-        pg_config --version;
-        make clean;
-        make;
-        pkg=postgis_tiger_geocoder-pg$${PGVER}-$${CI_COMMIT_TAG};
-        rm -rf "$${pkg}" "$${pkg}.tar.gz";
-        mkdir -p "$${pkg}/share/extension";
-        echo "POSTGIS_TIGER_GEOCODER: $${CI_COMMIT_TAG} https://gitea.osgeo.org/postgis/postgis_tiger_geocoder.git" > "$${pkg}/version.txt";
-        cp *.control "$${pkg}/share/extension/";
-        cp data/*.sql "$${pkg}/share/extension/";
-        cp README.md "$${pkg}/";
-        tar -czf "$${pkg}.tar.gz" "$${pkg}";
-        rm -rf "$${pkg}";
-        done
-
-  release-notes:
-    image: *test-image
-    commands:
-      - >-
-        sed -n "/^# $${CI_COMMIT_TAG}/,/^# /{ /^# $${CI_COMMIT_TAG}/d; /^#/d; p; }"
-        NEWS.md > release_notes.md
+      - sh scripts/release.sh "$${CI_COMMIT_TAG}"
 
   publish:
     image: woodpeckerci/plugin-release
     depends_on:
-      - build-package
-      - release-notes
+      - release
     settings:
       api_key:
         from_secret: GITEA_TOKEN
-      title: ${CI_COMMIT_TAG}
+      title: release_title.txt
       target: main
       note: release_notes.md
       checksum:
         - sha256
       files:
-        - postgis_tiger_geocoder-pg16-${CI_COMMIT_TAG}.tar.gz
-        - postgis_tiger_geocoder-pg17-${CI_COMMIT_TAG}.tar.gz
-        - postgis_tiger_geocoder-pg18-${CI_COMMIT_TAG}.tar.gz
-        - postgis_tiger_geocoder-pg19-${CI_COMMIT_TAG}.tar.gz
+        - postgis_tiger_geocoder-pg*.tar.gz
