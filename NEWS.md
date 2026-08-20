@@ -1,11 +1,12 @@
-# 2025.2
-2026/xx/xx
+# 2025.2rc1
+2026/08/20
 This version requires PostgreSQL 16 and above
 
 ## Bug Fixes and Enhancements
 
 - [GT-35](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues/35) Fix installation target (Devrim Gündüz)
 - [GT-38](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/38) Fix parallel builds (Paul Ramsey)
+- [GT-40](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues/40) Schema qualify extension dependencies (Regina Obe)
 
 # 2025.1
 
