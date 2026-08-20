@@ -6,6 +6,11 @@
 #
 # Produces in the working directory:
 #   postgis_tiger_geocoder-pg{16,17,18,19}-<version>.tar.gz
+#   postgis_tiger_geocoder-<version>.tar.gz
+#   postgis_tiger_geocoder-<version>.tar.gz.md5
+#   postgis_tiger_geocoder-<version>.zip
+#   postgis_tiger_geocoder-<version>.zip.md5
+#   SHA256SUMS.txt
 #   release_title.txt
 #   release_notes.md
 set -e
@@ -40,9 +45,29 @@ for PGVER in 16 17 18 19; do
 	echo "  ${PKG}.tar.gz"
 done
 
+# ── source tarballs ──────────────────────────────────────────────────
+BASE_URL="https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/archive"
+SRC_TAR="postgis_tiger_geocoder-${VERSION}.tar.gz"
+SRC_ZIP="postgis_tiger_geocoder-${VERSION}.zip"
+
+echo "downloading source archives"
+curl -fsSL -o "${SRC_TAR}" "${BASE_URL}/${VERSION}.tar.gz"
+curl -fsSL -o "${SRC_ZIP}" "${BASE_URL}/${VERSION}.zip"
+
+# ── checksums ────────────────────────────────────────────────────────
+echo "generating checksums"
+sha256sum \
+	postgis_tiger_geocoder-pg*-*.tar.gz \
+	"${SRC_TAR}" \
+	"${SRC_ZIP}" \
+	> SHA256SUMS.txt
+
+md5sum "${SRC_TAR}" | sed "s|${SRC_TAR}|${SRC_TAR}|" > "${SRC_TAR}.md5"
+md5sum "${SRC_ZIP}" | sed "s|${SRC_ZIP}|${SRC_ZIP}|" > "${SRC_ZIP}.md5"
+
 # ── release notes ────────────────────────────────────────────────────
 echo "${VERSION}" > release_title.txt
 
 sed -n "/^# ${VERSION}/,/^# /{ /^# ${VERSION}/d; /^#/d; p; }" NEWS.md > release_notes.md
 
-echo "release metadata written to release_title.txt and release_notes.md"
+echo "release metadata written to release_title.txt, release_notes.md, SHA256SUMS.txt, *.md5"

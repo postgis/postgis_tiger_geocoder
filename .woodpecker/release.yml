@@ -26,7 +26,9 @@ steps:
       title: release_title.txt
       target: main
       note: release_notes.md
-      checksum:
-        - sha256
       files:
-        - postgis_tiger_geocoder-pg*.tar.gz
+        - postgis_tiger_geocoder-*.tar.gz
+        - postgis_tiger_geocoder-*.zip
+        - postgis_tiger_geocoder-*.tar.gz.md5
+        - postgis_tiger_geocoder-*.zip.md5
+        - SHA256SUMS.txt
