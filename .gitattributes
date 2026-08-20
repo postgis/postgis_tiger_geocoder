@@ -6,3 +6,9 @@ GNUmakefile.in eol=lf
 *_expected  eol=lf
 *.dmp       eol=lf
 ChangeLog eol=lf
+
+# exclude from git archive (Gitea source tarballs)
+scripts/    export-ignore
+.woodpecker/ export-ignore
+.jenkins/    export-ignore
+ci/          export-ignore
