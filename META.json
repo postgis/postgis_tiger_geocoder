@@ -11,10 +11,10 @@
 	"license": "gpl_2",
 	"provides": {
 		"postgis_tiger_geocoder": {
-			"abstract": "PostGIS Geocoder functions",
+			"abstract": "PostGIS tiger geocoder and reverse geocoder functions",
+			"file": "postgis_tiger_geocoder.sql",
+			"docfile": "README.md",
 			"version": "2025.2",
-			"file": "sql/postgis_tiger_geocoder.sql",
-			"docfile": "doc/postgis_tiger_geocoder.md"
 		}
 	},
 	"prereqs": {
@@ -33,11 +33,11 @@
   "generated_by": "Regina O. Obe",
 	"resources": {
 		"bugtracker": {
-			"web": "http://trac.osgeo.org/postgis"
+			"web": "https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues"
 		},
 		"repository": {
 			"url": "https://gitea.osgeo.org/postgis/postgis_tiger_geocoder.git",
-			"web": "https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/src/branch/main/doc/postgis_tiger_geocoder.md",
+			"web": "https://gitea.osgeo.org/postgis/postgis_tiger_geocoder",
 			"type": "git"
 		}
 	},
