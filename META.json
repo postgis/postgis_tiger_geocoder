@@ -2,41 +2,48 @@
 	"name": "postgis_tiger_geocoder",
 	"abstract": "PostGIS Tiger Geocoder",
 	"description": "This module provides loader, geocoder, and reverse geocoder utilizing US Census Tiger data",
-	"version": "2025.1",
-	"release_status": "unstable",
-	"maintainer": "Leo Hsu and Regina Obe",
+	"version": "2025.2",
+	"release_status": "stable",
+	"maintainer": [
+		"Regina Obe <lr@pcorp.us>",
+		"PostGIS Development Team <psc@postgis.net>"
+	],
 	"license": "gpl_2",
 	"provides": {
 		"postgis_tiger_geocoder": {
 			"abstract": "PostGIS Geocoder functions",
-			"version": "2025.1",
+			"version": "2026.2",
 			"file": "sql/postgis_tiger_geocoder.sql",
 			"docfile": "doc/postgis_tiger_geocoder.md"
 		}
-	}
+	},
 	"prereqs": {
       "runtime": {
          "requires": {
             "plpgsql": 0,
-            "PostgreSQL": "14.0",
-            "postgis": "3.0.0", "fuzzystrmatch": 0
-         }
+            "PostgreSQL": "16",
+            "postgis": "3.6.0", "fuzzystrmatch": 0
+         },
+					"recommends": {
+						"PostgreSQL": "19",
+						"postgis": "3.7.0"
+					}
       }
     },
-    "generated_by": "Regina O. Obe",
+  "generated_by": "Regina O. Obe",
 	"resources": {
 		"bugtracker": {
 			"web": "http://trac.osgeo.org/postgis"
 		},
 		"repository": {
-			"url": "https://git.osgeo.org/postgis/tiger-geocoder.git",
-			"web": "https://postgis.net",
+			"url": "https://gitea.osgeo.org/postgis/postgis_tiger_geocoder.git",
+			"web": "https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/src/branch/main/doc/postgis_tiger_geocoder.md",
 			"type": "git"
 		}
 	},
 	"meta-spec": {
-		"version": "2025.1",
-		"url": "http://pgxn.org/meta/spec.txt"
+		"version": "1.0.0",
+		"url": "https://pgxn.org/meta/spec.txt"
 	},
 	"tags": [
 		"gis",

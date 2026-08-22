@@ -1,5 +1,5 @@
 # 2025.2
-2026/08/xx
+2026/08/22
 This version requires PostgreSQL 16 and above
 
 ## Bug Fixes and Enhancements
