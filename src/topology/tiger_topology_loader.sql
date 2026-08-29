@@ -42,9 +42,9 @@ DECLARE
 BEGIN
 	CASE region_type
 		WHEN 'place' THEN
-			SELECT the_geom , statefp FROM tiger.place INTO var_rgeom, var_statefp WHERE plcidfp = region_id;
+			SELECT the_geom , statefp FROM place INTO var_rgeom, var_statefp WHERE plcidfp = region_id;
 		WHEN 'county' THEN
-			SELECT the_geom, statefp FROM tiger.county INTO var_rgeom, var_statefp WHERE cntyidfp = region_id;
+			SELECT the_geom, statefp FROM county INTO var_rgeom, var_statefp WHERE cntyidfp = region_id;
 		ELSE
 			RAISE EXCEPTION 'Region type % IS NOT SUPPORTED', region_type;
 	END CASE;

@@ -12,6 +12,8 @@ $$ SELECT least(to_number( CASE WHEN trim($1) ~ '^[0-9]+$' THEN $1 ELSE '0' END,
   LANGUAGE sql IMMUTABLE
   COST 200;
 
+CREATE INDEX IF NOT EXISTS idx_tiger_addr_least_address ON tiger.addr USING btree(tiger.least_hn(fromhn,tohn));
+
 -- Note we are wrapping this in a function so we can make it immutable (for some reason least and greatest aren't considered immutable)
 -- and thu usable in an index or cacheable for multiple calls
 CREATE OR REPLACE FUNCTION greatest_hn(fromhn varchar, tohn varchar)

@@ -1,15 +1,23 @@
 \o discard.out
-BEGIN;
 
+\t on \a \set ECHO none
+SELECT tiger.SetSearchPathForInstall('tiger');
+
+\o discard.out
+
+CREATE TABLE tiger.zip_lookup_base_tx PARTITION OF tiger.zip_lookup_base FOR VALUES IN ('48');
 INSERT INTO tiger.zip_lookup_base(zip, state, county, city, statefp)
 VALUES ('75019', 'Texas', 'Dallas', 'Coppell', '48');
 
+CREATE TABLE tiger.place_tx PARTITION OF tiger.place FOR VALUES IN ('48');
 INSERT INTO tiger.place(statefp, placefp, plcidfp, name)
 VALUES ('48', '00001', '4800001', 'Coppell');
 
+CREATE TABLE tiger.faces_tx PARTITION OF tiger.faces FOR VALUES IN ('48');
 INSERT INTO tiger.faces(tfid, statefp, placefp)
 VALUES (2001, '48', '00001');
 
+CREATE TABLE tiger.edges_tx PARTITION OF tiger.edges FOR VALUES IN ('48');
 INSERT INTO tiger.edges(statefp, countyfp, tlid, tfidl, tfidr, fullname, tnidf, tnidt, the_geom)
 VALUES
     ('48', '113', 1001, 2001, 2001, 'N Belt Line Rd', 10, 11,
@@ -27,6 +35,8 @@ VALUES
     ('48', '113', 1007, 2001, 2001, 'N Denton Tap Rd', 30, 33,
         ST_GeomFromText('MULTILINESTRING((-96.993416 32.986000,-96.993416 32.988000))', 4269));
 
+CREATE TABLE tiger.featnames_tx PARTITION OF tiger.featnames FOR VALUES IN ('48');
+
 INSERT INTO tiger.featnames(statefp, tlid, fullname, name, predirabrv, suftypabrv, pretypabrv)
 VALUES
     ('48', 1001, 'N Belt Line Rd', 'Belt Line', 'N', 'Rd', NULL),
@@ -37,6 +47,7 @@ VALUES
     ('48', 1006, 'State Highway 121', '121', NULL, NULL, 'State Hwy'),
     ('48', 1007, 'N Denton Tap Rd', 'Denton Tap', 'N', 'Rd', NULL);
 
+CREATE TABLE tiger.addr_tx PARTITION OF tiger.addr FOR VALUES IN ('48');
 INSERT INTO tiger.addr(statefp, tlid, fromhn, tohn, side, zip)
 VALUES
     ('48', 1001, '100', '198', 'L', '75019'),
@@ -46,7 +57,7 @@ VALUES
     ('48', 1005, '0', '0', 'L', '75019'),
     ('48', 1006, '0', '0', 'L', '75019'),
     ('48', 1007, '100', '198', 'L', '75019');
-
+\t on \a \set ECHO none
 \o
 SELECT '#1461c' AS ticket, streetname, streettypeabbrev
 FROM normalize_address('0 353 Rte, Coppell, TX');
@@ -73,5 +84,6 @@ SELECT '#1456b' AS ticket, count(*) > 0
 FROM geocode_intersection('SH121', 'N Denton Tap Rd', 'TX', 'Coppell');
 
 \o discard.out
-ROLLBACK;
+\o
+
 \o

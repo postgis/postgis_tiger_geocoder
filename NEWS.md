@@ -1,3 +1,11 @@
+# 2026.1
+2026/xx/xx
+This version requires PostgreSQL 16 and above
+
+## Breaking changes
+
+- Move from inherited model to partitioned model
+
 # 2025.2
 2026/08/23
 This version requires PostgreSQL 16 and above

@@ -2,7 +2,7 @@
 	"name": "postgis_tiger_geocoder",
 	"abstract": "PostGIS Tiger Geocoder",
 	"description": "This module provides loader, geocoder, and reverse geocoder utilizing US Census Tiger data",
-	"version": "2025.2",
+	"version": "2026.1",
 	"release_status": "stable",
 	"maintainer": [
 		"Regina Obe <lr@pcorp.us>",
