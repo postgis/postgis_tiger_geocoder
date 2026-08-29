@@ -4,7 +4,8 @@ This version requires PostgreSQL 16 and above
 
 ## Breaking changes
 
-- Move from inherited model to partitioned model
+- [GT-30](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues/30) Move from inherited model to partitioned model (Regina Obe)
+- [GT-56](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues/56) Schema qualify all references to tiger schema (Regina Obe)
 
 # 2025.2
 2026/08/23
