@@ -1,7 +1,7 @@
-CREATE OR REPLACE FUNCTION geocode_location(
-    parsed NORM_ADDY,
+CREATE OR REPLACE FUNCTION tiger.geocode_location(
+    parsed tiger.norm_addy,
     restrict_geom @extschema:postgis@.geometry DEFAULT null,
-    OUT ADDY NORM_ADDY,
+    OUT ADDY tiger.norm_addy,
     OUT GEOMOUT @extschema:postgis@.GEOMETRY,
     OUT RATING INTEGER
 ) RETURNS SETOF RECORD

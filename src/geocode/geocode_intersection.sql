@@ -8,21 +8,21 @@
 -- Use case example an address at the intersection of 2 streets:
 -- SELECT pprint_addy(addy), st_astext(geomout),rating FROM geocode_intersection('School St', 'Washington St', 'MA', 'Boston','02117');
 --DROP FUNCTION tiger.geocode_intersection(text,text,text,text,text,integer);
-CREATE OR REPLACE FUNCTION geocode_intersection(
+CREATE OR REPLACE FUNCTION tiger.geocode_intersection(
     IN roadway1 text,
     IN roadway2 text,
     IN in_state text,
     IN in_city text DEFAULT ''::text,
     IN in_zip text DEFAULT ''::text,
     IN num_results integer DEFAULT 10,
-    OUT addy norm_addy,
+    OUT addy tiger.norm_addy,
     OUT geomout @extschema:postgis@.geometry,
     OUT rating integer)
   RETURNS SETOF record AS
 $$
 DECLARE
-    var_na_road norm_addy;
-    var_na_inter1 norm_addy;
+    var_na_road tiger.norm_addy;
+    var_na_inter1 tiger.norm_addy;
     var_road_name text;
     var_road_fullname text;
     var_inter_name text;
@@ -182,4 +182,4 @@ $$
   LANGUAGE plpgsql IMMUTABLE
   COST 1000
   ROWS 10;
-ALTER FUNCTION geocode_intersection(text, text, text, text, text, integer) SET join_collapse_limit='2';
+ALTER FUNCTION tiger.geocode_intersection(text, text, text, text, text, integer) SET join_collapse_limit='2';

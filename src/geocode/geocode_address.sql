@@ -1,5 +1,5 @@
---DROP FUNCTION IF EXISTS geocode_address(norm_addy, integer , @extschema:postgis@.geometry);
-CREATE OR REPLACE FUNCTION geocode_address(IN parsed norm_addy, max_results integer DEFAULT 10, restrict_geom @extschema:postgis@.geometry DEFAULT NULL, OUT addy norm_addy, OUT geomout @extschema:postgis@.geometry, OUT rating integer)
+--DROP FUNCTION IF EXISTS geocode_address(tiger.norm_addy, integer , @extschema:postgis@.geometry);
+CREATE OR REPLACE FUNCTION tiger.geocode_address(IN parsed tiger.norm_addy, max_results integer DEFAULT 10, restrict_geom @extschema:postgis@.geometry DEFAULT NULL, OUT addy tiger.norm_addy, OUT geomout @extschema:postgis@.geometry, OUT rating integer)
   RETURNS SETOF record AS
 $$
 DECLARE

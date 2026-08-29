@@ -52,14 +52,14 @@ language plpgsql;
 
 SELECT tiger.install_geocode_settings(); /** create the table if it doesn't exist **/
 
-CREATE OR REPLACE FUNCTION get_geocode_setting(setting_name text)
+CREATE OR REPLACE FUNCTION tiger.get_geocode_setting(setting_name text)
 RETURNS text AS
 $$
 SELECT COALESCE(gc.setting,gd.setting) As setting FROM tiger.geocode_settings_default AS gd LEFT JOIN tiger.geocode_settings AS gc ON gd.name = gc.name  WHERE gd.name = $1;
 $$
 language sql STABLE;
 
-CREATE OR REPLACE FUNCTION set_geocode_setting(setting_name text, setting_value text)
+CREATE OR REPLACE FUNCTION tiger.set_geocode_setting(setting_name text, setting_value text)
 RETURNS text AS
 $$
 INSERT INTO tiger.geocode_settings(name, setting, unit, category, short_desc)

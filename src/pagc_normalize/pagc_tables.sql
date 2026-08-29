@@ -1,8 +1,7 @@
 --  Lookup tables used by pagc to standardize in format expected by tiger geocoder
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
-SELECT tiger.SetSearchPathForInstall('tiger');
-CREATE OR REPLACE FUNCTION install_pagc_tables()
+CREATE OR REPLACE FUNCTION tiger.install_pagc_tables()
 	RETURNS void AS
 $$
 DECLARE var_temp text;

@@ -1,7 +1,7 @@
 -- Determine the number of words in a string.  Words are allowed to
 -- be separated only by spaces, but multiple spaces between
 -- words are allowed.
-CREATE OR REPLACE FUNCTION count_words(VARCHAR) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION tiger.count_words(VARCHAR) RETURNS INTEGER
 AS $_$
 DECLARE
   tempString VARCHAR;

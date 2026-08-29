@@ -1,5 +1,3 @@
---SET search_path TO tiger, public;
-SELECT tiger.SetSearchPathForInstall('tiger');
 -- Create direction lookup table
 DROP TABLE IF EXISTS tiger.direction_lookup;
 CREATE TABLE tiger.direction_lookup (name VARCHAR(20) PRIMARY KEY, abbrev VARCHAR(3));

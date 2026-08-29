@@ -7,7 +7,7 @@
 -- fifth are from the other.
 -- in_side Side of street -- either 'L', 'R' or if blank ignores side of road
 -- in_offset_m -- number of meters offset to the side
-CREATE OR REPLACE FUNCTION interpolate_from_address(given_address INTEGER, in_addr1 VARCHAR, in_addr2 VARCHAR, in_road @extschema:postgis@.GEOMETRY,
+CREATE OR REPLACE FUNCTION tiger.interpolate_from_address(given_address INTEGER, in_addr1 VARCHAR, in_addr2 VARCHAR, in_road @extschema:postgis@.GEOMETRY,
 	in_side VARCHAR DEFAULT '',in_offset_m float DEFAULT 10) RETURNS @extschema:postgis@.GEOMETRY
 AS $_$
 DECLARE

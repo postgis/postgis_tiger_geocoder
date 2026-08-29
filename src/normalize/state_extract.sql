@@ -7,7 +7,7 @@
 --
 -- The result is the state as given in the input string, and the approved
 -- state abbreviation, separated by a colon.
-CREATE OR REPLACE FUNCTION state_extract(rawInput VARCHAR) RETURNS VARCHAR
+CREATE OR REPLACE FUNCTION tiger.state_extract(rawInput VARCHAR) RETURNS VARCHAR
 AS $_$
 DECLARE
   tempInt INTEGER;

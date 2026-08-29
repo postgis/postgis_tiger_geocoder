@@ -10,7 +10,7 @@ All reference tables are installed in the `tiger` schema via `CREATE EXTENSION p
 Data downloaded from census website is by default loaded into a schema `tiger_data` and these tables
 inherit from the core structures in `tiger` schema.
 
-> **Note:** The `tiger` schema must be on the database `search_path` for all functions to resolve correctly.
+> **Note:** All the extension's functions, types, and tables are schema-qualified with the `tiger` schema, so they resolve correctly without requiring `tiger` on the database `search_path`.
 
 For more details about using the functions, refer to the [Function Reference](doc/postgis_tiger_geocoder.md).
 
@@ -64,8 +64,9 @@ if a non-super user is installing:
 CREATE EXTENSION postgis_tiger_geocoder CASCADE;
 ```
 
-After install, make sure to add tiger to your database search_path e.g.
-Replace *mydb* with the name of your database.
+Adding tiger to the database `search_path` is optional and only needed if
+you want to call the functions without schema-qualifying them. Replace *mydb*
+with the name of your database.
 
 ```sql
 ALTER DATABASE mydb SET search_path="$user",public,tiger;

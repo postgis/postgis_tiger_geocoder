@@ -8,8 +8,8 @@
 -- is only resolved when PAGC parsing is invoked, while still using a single
 -- standardize_address() call to preserve the wrapper speedup work.
 -- USAGE: SELECT * FROM tiger.pagc_normalize_address('One Devonshire Place, PH 301, Boston, MA 02109');
-CREATE OR REPLACE FUNCTION pagc_normalize_address(in_rawinput character varying)
-  RETURNS norm_addy AS
+CREATE OR REPLACE FUNCTION tiger.pagc_normalize_address(in_rawinput character varying)
+  RETURNS tiger.norm_addy AS
 $$
 DECLARE
   sa RECORD;
@@ -46,7 +46,7 @@ BEGIN
       TRUE,
       COALESCE(NULLIF(split_part(COALESCE(sa.postcode, ''), '-', 2), ''), NULLIF(parsed.zipplus, '')),
       NULLIF(sa.house_num, '')
-  )::norm_addy;
+  )::tiger.norm_addy;
 END
 $$
   LANGUAGE plpgsql IMMUTABLE STRICT

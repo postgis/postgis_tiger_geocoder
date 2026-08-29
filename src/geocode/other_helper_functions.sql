@@ -6,7 +6,7 @@
 -- It also allows us to shorten and possibly better cache the repetitive pattern in the code
 -- greatest(to_number(b.fromhn,''99999999''),to_number(b.tohn,''99999999''))
 -- and least(to_number(b.fromhn,''99999999''),to_number(b.tohn,''99999999''))
-CREATE OR REPLACE FUNCTION least_hn(fromhn varchar, tohn varchar)
+CREATE OR REPLACE FUNCTION tiger.least_hn(fromhn varchar, tohn varchar)
   RETURNS integer AS
 $$ SELECT least(to_number( CASE WHEN trim($1) ~ '^[0-9]+$' THEN $1 ELSE '0' END,'9999999'),to_number(CASE WHEN trim($2) ~ '^[0-9]+$' THEN $2 ELSE '0' END,'9999999') )::integer;  $$
   LANGUAGE sql IMMUTABLE
@@ -16,7 +16,7 @@ CREATE INDEX IF NOT EXISTS idx_tiger_addr_least_address ON tiger.addr USING btre
 
 -- Note we are wrapping this in a function so we can make it immutable (for some reason least and greatest aren't considered immutable)
 -- and thu usable in an index or cacheable for multiple calls
-CREATE OR REPLACE FUNCTION greatest_hn(fromhn varchar, tohn varchar)
+CREATE OR REPLACE FUNCTION tiger.greatest_hn(fromhn varchar, tohn varchar)
   RETURNS integer AS
 $$ SELECT greatest(to_number( CASE WHEN trim($1) ~ '^[0-9]+$' THEN $1 ELSE '0' END,'99999999'),to_number(CASE WHEN trim($2) ~ '^[0-9]+$' THEN $2 ELSE '0' END,'99999999') )::integer;  $$
   LANGUAGE sql IMMUTABLE
@@ -26,7 +26,7 @@ $$ SELECT greatest(to_number( CASE WHEN trim($1) ~ '^[0-9]+$' THEN $1 ELSE '0' E
 -- This is generally more efficient than doing levenshtein
 -- Since when people get the wrong zip, its usually off by one or 2 numeric distance
 -- We only consider the first 5 digits
-CREATE OR REPLACE FUNCTION diff_zip(zip1 varchar, zip2 varchar)
+CREATE OR REPLACE FUNCTION tiger.diff_zip(zip1 varchar, zip2 varchar)
   RETURNS integer AS
 $$ SELECT abs(to_number( CASE WHEN trim(substring($1,1,5)) ~ '^[0-9]+$' THEN $1 ELSE '0' END,'99999')::integer - to_number( CASE WHEN trim(substring($2,1,5)) ~ '^[0-9]+$' THEN $2 ELSE '0' END,'99999')::integer )::integer;  $$
   LANGUAGE sql IMMUTABLE STRICT
@@ -35,7 +35,7 @@ $$ SELECT abs(to_number( CASE WHEN trim(substring($1,1,5)) ~ '^[0-9]+$' THEN $1 
 -- Canonicalize separator-only formatting differences in road names without
 -- collapsing all punctuation, so highway names like I-635 and I- 635
 -- compare equally while still distinguishing unrelated names.
-CREATE OR REPLACE FUNCTION normalize_street_name(input_street varchar)
+CREATE OR REPLACE FUNCTION tiger.normalize_street_name(input_street varchar)
     RETURNS varchar AS
 $$
     SELECT trim(
@@ -56,7 +56,7 @@ COST 5 PARALLEL SAFE;
 -- as described in: http://trac.osgeo.org/postgis/ticket/1068
 -- This will always return false if one of the streets is not a numeric street
 -- By numeric it must start with numbers (allow fractions such as 1/2 and spaces such as 12 1/2th) and be less than 10 characters
-CREATE OR REPLACE FUNCTION numeric_streets_equal(input_street varchar, output_street varchar)
+CREATE OR REPLACE FUNCTION tiger.numeric_streets_equal(input_street varchar, output_street varchar)
     RETURNS boolean AS
 $$
     SELECT COALESCE(length($1) < 10 AND length($2) < 10
@@ -67,7 +67,7 @@ LANGUAGE sql IMMUTABLE
 COST 5 PARALLEL SAFE;
 
 -- Generate script to drop all non-primary unique indexes on tiger and tiger_data tables
-CREATE OR REPLACE FUNCTION drop_indexes_generate_script(tiger_data_schema text DEFAULT 'tiger_data')
+CREATE OR REPLACE FUNCTION tiger.drop_indexes_generate_script(tiger_data_schema text DEFAULT 'tiger_data')
 RETURNS text AS
 $$
 SELECT array_to_string(ARRAY(SELECT 'DROP INDEX ' || schemaname || '.' || indexname || ';'
@@ -218,7 +218,7 @@ ORDER BY 1), E'\r');
 $$
 LANGUAGE sql VOLATILE;
 
-CREATE OR REPLACE FUNCTION install_missing_indexes() RETURNS boolean
+CREATE OR REPLACE FUNCTION tiger.install_missing_indexes() RETURNS boolean
 AS
 $$
 DECLARE var_sql text = tiger.missing_indexes_generate_script();
@@ -229,7 +229,7 @@ END
 $$
 language plpgsql;
 
-CREATE OR REPLACE FUNCTION drop_dupe_featnames_generate_script() RETURNS text
+CREATE OR REPLACE FUNCTION tiger.drop_dupe_featnames_generate_script() RETURNS text
 AS
 $$
 
@@ -259,7 +259,7 @@ LANGUAGE sql VOLATILE;
 -- Helper function that useful for catch slight mistakes in zip position given a 5 digit zip code
 -- will return a range of zip codes that are between zip - num_before and zip - num_after
 -- e.g. usage -> zip_range('02109', -1,+1) -> {'02108', '02109', '02110'}
-CREATE OR REPLACE FUNCTION zip_range(zip text, range_start integer, range_end integer) RETURNS varchar[] AS
+CREATE OR REPLACE FUNCTION tiger.zip_range(zip text, range_start integer, range_end integer) RETURNS varchar[] AS
 $$
    SELECT ARRAY(
         SELECT lpad((to_number( CASE WHEN trim(substring($1,1,5)) ~ '^[0-9]+$' THEN $1 ELSE '0' END,'99999')::integer + i)::text, 5, '0')::varchar

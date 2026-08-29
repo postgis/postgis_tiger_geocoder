@@ -1,7 +1,6 @@
 \o discard.out
 
 \t on \a \set ECHO none
-SELECT tiger.SetSearchPathForInstall('tiger');
 
 \o discard.out
 
@@ -60,28 +59,28 @@ VALUES
 \t on \a \set ECHO none
 \o
 SELECT '#1461c' AS ticket, streetname, streettypeabbrev
-FROM normalize_address('0 353 Rte, Coppell, TX');
+FROM tiger.normalize_address('0 353 Rte, Coppell, TX');
 
-SELECT '#1461a' AS ticket, pprint_addy(addy), ST_AsText(ST_SnapToGrid(geomout, 0.000001)), rating
-FROM geocode_intersection('N. Belt Line', 'I- 635', 'TX', 'Coppell')
+SELECT '#1461a' AS ticket, tiger.pprint_addy(addy), ST_AsText(ST_SnapToGrid(geomout, 0.000001)), rating
+FROM tiger.geocode_intersection('N. Belt Line', 'I- 635', 'TX', 'Coppell')
 ORDER BY rating
 LIMIT 1;
 
-SELECT '#1461b' AS ticket, pprint_addy(addy), ST_AsText(ST_SnapToGrid(geomout, 0.000001)), rating
-FROM geocode_intersection('N. Belt Line', 'I-635', 'TX', 'Coppell')
+SELECT '#1461b' AS ticket, tiger.pprint_addy(addy), ST_AsText(ST_SnapToGrid(geomout, 0.000001)), rating
+FROM tiger.geocode_intersection('N. Belt Line', 'I-635', 'TX', 'Coppell')
 ORDER BY rating
 LIMIT 1;
 
-SELECT '#1461d' AS ticket, pprint_addy(addy), ST_AsText(ST_SnapToGrid(geomout, 0.000001)), rating
-FROM geocode_intersection('Weld', 'School', 'TX', 'Coppell')
+SELECT '#1461d' AS ticket, tiger.pprint_addy(addy), ST_AsText(ST_SnapToGrid(geomout, 0.000001)), rating
+FROM tiger.geocode_intersection('Weld', 'School', 'TX', 'Coppell')
 ORDER BY rating
 LIMIT 1;
 
 SELECT '#1456a' AS ticket, count(*) > 0
-FROM geocode_intersection('SH 121', 'N Denton Tap Rd', 'TX', 'Coppell');
+FROM tiger.geocode_intersection('SH 121', 'N Denton Tap Rd', 'TX', 'Coppell');
 
 SELECT '#1456b' AS ticket, count(*) > 0
-FROM geocode_intersection('SH121', 'N Denton Tap Rd', 'TX', 'Coppell');
+FROM tiger.geocode_intersection('SH121', 'N Denton Tap Rd', 'TX', 'Coppell');
 
 \o discard.out
 \o

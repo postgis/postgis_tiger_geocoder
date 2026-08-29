@@ -3,7 +3,7 @@
 -- or may not be null.  If the second string is null, the value returned is
 -- 3, otherwise it is the levenshtein difference between the two.
 -- Change 2010-10-18 Regina Obe - name verbose to var_verbose since get compile error in PostgreSQL 9.0
-CREATE OR REPLACE FUNCTION nullable_levenshtein(VARCHAR, VARCHAR) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION tiger.nullable_levenshtein(VARCHAR, VARCHAR) RETURNS INTEGER
 AS $$
   SELECT CASE
       WHEN $1 IS NULL THEN NULL

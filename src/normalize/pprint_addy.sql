@@ -9,8 +9,8 @@ $$
 $$
 LANGUAGE sql IMMUTABLE STRICT; /** I know this should be stable but it's practically immutable :) **/
 
-CREATE OR REPLACE FUNCTION pprint_addy(
-    input NORM_ADDY
+CREATE OR REPLACE FUNCTION tiger.pprint_addy(
+    input tiger.norm_addy
 ) RETURNS VARCHAR
 AS $_$
 DECLARE

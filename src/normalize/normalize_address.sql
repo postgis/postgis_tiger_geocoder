@@ -51,13 +51,13 @@
 -- StreetAddress:DirectionPrefixAbbreviation:StreetName:StreetTypeAbbreviation:
 -- DirectionSuffixAbbreviation:Location:StateAbbreviation:ZipCode
 -- This is more standardized and better for use with a geocoder.
-CREATE OR REPLACE FUNCTION normalize_address(in_rawinput character varying)
-  RETURNS norm_addy AS
+CREATE OR REPLACE FUNCTION tiger.normalize_address(in_rawinput character varying)
+  RETURNS tiger.norm_addy AS
 $$
 DECLARE
   debug_flag boolean := tiger.get_geocode_setting('debug_normalize_address')::boolean;
   use_pagc boolean := COALESCE(tiger.get_geocode_setting('use_pagc_address_parser')::boolean, false);
-  result norm_addy;
+  result tiger.norm_addy;
   addressString VARCHAR;
   zipString VARCHAR;
   preDir VARCHAR;

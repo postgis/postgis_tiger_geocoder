@@ -83,7 +83,7 @@ sql/test-geocode_intersection_spacing.sql: sql_bits/test_tuples_only_unaligned.s
 sql/test-upgrade.sql: sql_bits/test_tuples_only_unaligned_plain.sql.in | sql
 	cat $^ > $@
 	echo 'ALTER EXTENSION ${EXTENSION} UPDATE TO "ANY"; ALTER EXTENSION ${EXTENSION} UPDATE TO "$(EXTVERSION)";' >> $@
-	echo "SELECT 'GT-24', position('CREATE SCHEMA IF NOT EXISTS tiger_data' in loader_generate_script(ARRAY['RI'], 'sh')) > 0;" >> $@
+	echo "SELECT 'GT-24', position('CREATE SCHEMA IF NOT EXISTS tiger_data' in tiger.loader_generate_script(ARRAY['RI'], 'sh')) > 0;" >> $@
 
 expected/test-upgrade.out: sql_bits/test_upgrade.out.in | expected
 	cat $^ > $@
@@ -100,8 +100,7 @@ data/$(EXTENSION).sql: sql/$(EXTENSION)_pre.sql | data
 data/$(EXTENSION)--ANY--$(EXTVERSION).sql: sql/tiger_geocoder_upgrade_minor.sql sql_bits/mark_editable_objects.sql.in | data
 	cat $^ > $@
 
-sql/tiger_geocoder_upgrade_minor.sql: src/utility/set_search_path.sql \
-  	sql_bits/upgrade_before.sql.in \
+sql/tiger_geocoder_upgrade_minor.sql: sql_bits/upgrade_before.sql.in \
   	src/geocode_settings.sql \
   	src/tiger_loader.sql \
 	src/utility/utmzone.sql \
@@ -137,12 +136,10 @@ sql/tiger_geocoder_upgrade_minor.sql: src/utility/set_search_path.sql \
 
 #also remove tiger_data from extension if it is part of it so data gets backed up
 sql/tiger_geocoder.sql: sql_bits/norm_addy_create.sql.in \
-	src/utility/set_search_path.sql \
 	src/geocode_settings.sql \
 	src/tables/lookup_tables_2011.sql \
 	src/tables/census_tables.sql \
 	src/tiger_loader.sql \
-	src/utility/set_search_path.sql \
 	src/utility/utmzone.sql \
 	src/utility/cull_null.sql \
 	src/utility/regex_escape.sql \

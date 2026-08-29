@@ -11,7 +11,7 @@
 -- returned, rather than the string found from the tables.  All the searching
 -- is done largely to determine the length (words) of the location, to allow
 -- the intended street name to be correctly identified.
-CREATE OR REPLACE FUNCTION location_extract(fullStreet VARCHAR, stateAbbrev VARCHAR) RETURNS VARCHAR
+CREATE OR REPLACE FUNCTION tiger.location_extract(fullStreet VARCHAR, stateAbbrev VARCHAR) RETURNS VARCHAR
 AS $_$
 DECLARE
   ws VARCHAR;

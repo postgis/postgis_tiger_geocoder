@@ -3,7 +3,7 @@
 -- Rates the street based on the given attributes.  Only streetNames are
 -- required.  If any others are null (either A or B) they are treated as
 -- empty strings.
-CREATE OR REPLACE FUNCTION rate_attributes(dirpA VARCHAR, dirpB VARCHAR, streetNameA VARCHAR, streetNameB VARCHAR,
+CREATE OR REPLACE FUNCTION tiger.rate_attributes(dirpA VARCHAR, dirpB VARCHAR, streetNameA VARCHAR, streetNameB VARCHAR,
     streetTypeA VARCHAR, streetTypeB VARCHAR, dirsA VARCHAR, dirsB VARCHAR, prequalabr VARCHAR) RETURNS INTEGER
 AS $_$
 DECLARE
@@ -56,7 +56,7 @@ $_$ LANGUAGE plpgsql IMMUTABLE;
 -- function, so it's requirements must also be met.
 -- changed: 2010-10-18 Regina Obe - all references to verbose to var_verbose since causes compile errors in 9.0
 -- changed: 2011-06-25 revise to use real named args and fix direction rating typo
-CREATE OR REPLACE FUNCTION rate_attributes(dirpA VARCHAR, dirpB VARCHAR, streetNameA VARCHAR, streetNameB VARCHAR,
+CREATE OR REPLACE FUNCTION tiger.rate_attributes(dirpA VARCHAR, dirpB VARCHAR, streetNameA VARCHAR, streetNameB VARCHAR,
     streetTypeA VARCHAR, streetTypeB VARCHAR, dirsA VARCHAR, dirsB VARCHAR,  locationA VARCHAR, locationB VARCHAR, prequalabr VARCHAR) RETURNS INTEGER
 AS $$
   SELECT CASE

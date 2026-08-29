@@ -6,7 +6,7 @@
 -- It defaults to returning the tract name but can be changed to return track geoid id.
 -- pass in 'tract_id' to get the full geoid, 'name' to get the short decimal name
 
-CREATE OR REPLACE FUNCTION get_tract(IN loc_geom @extschema:postgis@.geometry, output_field text DEFAULT 'name')
+CREATE OR REPLACE FUNCTION tiger.get_tract(IN loc_geom @extschema:postgis@.geometry, output_field text DEFAULT 'name')
   RETURNS text AS
 $$
 DECLARE

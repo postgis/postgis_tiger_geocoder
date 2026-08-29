@@ -1,4 +1,4 @@
-CREATE TYPE norm_addy AS (
+CREATE TYPE tiger.norm_addy AS (
     address INTEGER,
     preDirAbbrev VARCHAR,
     streetName VARCHAR,

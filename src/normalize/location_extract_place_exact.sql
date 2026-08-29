@@ -3,7 +3,7 @@
 -- the location described at the end of the given string.  If an exact match
 -- fails, a fuzzy match is performed.  The location as found in the given
 -- string is returned.
-CREATE OR REPLACE FUNCTION location_extract_place_exact(
+CREATE OR REPLACE FUNCTION tiger.location_extract_place_exact(
     fullStreet VARCHAR,
     stateAbbrev VARCHAR
 ) RETURNS VARCHAR

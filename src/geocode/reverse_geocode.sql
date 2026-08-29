@@ -5,9 +5,8 @@
 -- This function given a point try to determine the approximate street address (norm_addy form)
 -- and array of cross streets, as well as interpolated points along the streets
 -- Use case example an address at the intersection of 3 streets: SELECT pprint_addy(r.addy[1]) As st1, pprint_addy(r.addy[2]) As st2, pprint_addy(r.addy[3]) As st3, array_to_string(r.street, ',') FROM reverse_geocode(@extschema:postgis@.ST_GeomFromText('POINT(-71.057811 42.358274)',4269)) As r;
---set search_path=tiger,public;
 
-CREATE OR REPLACE FUNCTION reverse_geocode(IN pt @extschema:postgis@.geometry, IN include_strnum_range boolean DEFAULT false, OUT intpt @extschema:postgis@.geometry[], OUT addy norm_addy[], OUT street character varying[])
+CREATE OR REPLACE FUNCTION tiger.reverse_geocode(IN pt @extschema:postgis@.geometry, IN include_strnum_range boolean DEFAULT false, OUT intpt @extschema:postgis@.geometry[], OUT addy tiger.norm_addy[], OUT street character varying[])
   RETURNS record AS
 $BODY$
 DECLARE
@@ -15,8 +14,8 @@ DECLARE
   var_state text := NULL;
   var_stusps text := NULL;
   var_countyfp text := NULL;
-  var_addy NORM_ADDY;
-  var_addy_alt NORM_ADDY;
+  var_addy tiger.norm_addy;
+  var_addy_alt tiger.norm_addy;
   var_nstrnum numeric(10);
   var_primary_line @extschema:postgis@.geometry := NULL;
   var_primary_dist numeric(10,2) ;

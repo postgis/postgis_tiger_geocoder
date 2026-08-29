@@ -3,7 +3,7 @@
 -- words are allowed.  Words must be alphanumberic.
 -- If more words are requested than exist, the full input string is
 -- returned.
-CREATE OR REPLACE FUNCTION get_last_words(
+CREATE OR REPLACE FUNCTION tiger.get_last_words(
     inputString VARCHAR,
     count INTEGER
 ) RETURNS VARCHAR

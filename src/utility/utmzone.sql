@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION utmzone(@extschema:postgis@.geometry) RETURNS integer AS
+CREATE OR REPLACE FUNCTION tiger.utmzone(@extschema:postgis@.geometry) RETURNS integer AS
 $BODY$
 DECLARE
     geomgeog @extschema:postgis@.geometry;

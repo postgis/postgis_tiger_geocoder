@@ -11,10 +11,9 @@
 -- Author: Regina Obe and Leo Hsu <lr@pcorp.us>
 --
 -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
--- SELECT tiger.SetSearchPathForInstall('tiger');
 DROP FUNCTION IF EXISTS tiger.create_census_base_tables();
 
-CREATE OR REPLACE FUNCTION loader_macro_replace(param_input text, param_keys text[],param_values text[])
+CREATE OR REPLACE FUNCTION tiger.loader_macro_replace(param_input text, param_keys text[],param_values text[])
 RETURNS text AS
 $$
 	DECLARE var_result text = param_input;
@@ -63,7 +62,7 @@ ALTER TABLE tiger.tabblock20 ADD IF NOT EXISTS pop float;
 
 -- Helper function that generates script to drop all tables in a particular schema for a particular table
 -- This is useful in case you need to reload a state
-CREATE OR REPLACE FUNCTION drop_state_tables_generate_script(param_state text, param_schema text DEFAULT 'tiger_data')
+CREATE OR REPLACE FUNCTION tiger.drop_state_tables_generate_script(param_state text, param_schema text DEFAULT 'tiger_data')
   RETURNS text AS
 $$
 SELECT array_to_string(array_agg('DROP TABLE ' || quote_ident(table_schema) || '.' || quote_ident(table_name) || ';'),E'\n')
@@ -76,7 +75,7 @@ $$
 -- Helper function that generates script to drop all nation tables (county, state) in a particular schema
 -- This is useful for loading 2011 because state and county tables aren't broken out into separate state files
 DROP FUNCTION IF EXISTS tiger.drop_national_tables_generate_script(text);
-CREATE OR REPLACE FUNCTION drop_nation_tables_generate_script(param_schema text DEFAULT 'tiger_data')
+CREATE OR REPLACE FUNCTION tiger.drop_nation_tables_generate_script(param_schema text DEFAULT 'tiger_data')
   RETURNS text AS
 $$
 SELECT array_to_string(array_agg('DROP TABLE ' || quote_ident(table_schema) || '.' || quote_ident(table_name) || ';'),E'\n')
@@ -278,7 +277,7 @@ VALUES(9, 'addrfeat', 'addrfeat', false, true, false,true, 'a',
 	'${psql} -c "CREATE TABLE ${data_schema}.${state_abbrev}_${lookup_name} PARTITION OF tiger.${table_name} FOR VALUES IN (''${state_fips}'');" ',
 	'${psql} -c "VACUUM ANALYZE ${data_schema}.${state_abbrev}_${lookup_name};"',  ARRAY['gid','statefp','fromarmid', 'toarmid']);
 
-CREATE OR REPLACE FUNCTION loader_generate_nation_script(os text)
+CREATE OR REPLACE FUNCTION tiger.loader_generate_nation_script(os text)
   RETURNS SETOF text AS
 $BODY$
 WITH lu AS (SELECT lookup_name, table_name, pre_load_process,post_load_process, process_order, insert_mode, single_geom_mode, level_nation, level_county, level_state
@@ -321,7 +320,7 @@ WHERE platform.os = $1 -- generate script for selected platform
 $BODY$
   LANGUAGE sql VOLATILE;
 
-CREATE OR REPLACE FUNCTION loader_generate_script(param_states text[], os text)
+CREATE OR REPLACE FUNCTION tiger.loader_generate_script(param_states text[], os text)
   RETURNS SETOF text AS
 $BODY$
 SELECT
@@ -375,7 +374,7 @@ AND platform.os = $2  -- generate script for selected platform
 $BODY$
   LANGUAGE sql VOLATILE;
 
-CREATE OR REPLACE FUNCTION loader_load_staged_data(param_staging_table text, param_target_table text, param_columns_exclude text[]) RETURNS integer
+CREATE OR REPLACE FUNCTION tiger.loader_load_staged_data(param_staging_table text, param_target_table text, param_columns_exclude text[]) RETURNS integer
 AS
 $$
 DECLARE
@@ -410,7 +409,7 @@ END;
 $$
 LANGUAGE 'plpgsql' VOLATILE;
 
-CREATE OR REPLACE FUNCTION loader_load_staged_data(param_staging_table text, param_target_table text)
+CREATE OR REPLACE FUNCTION tiger.loader_load_staged_data(param_staging_table text, param_target_table text)
 RETURNS integer AS
 $$
 -- exclude this set list of columns if no exclusion list is specified
@@ -424,7 +423,7 @@ $$
 $$
 language 'sql' VOLATILE;
 
-CREATE OR REPLACE FUNCTION loader_generate_census_script(param_states text[], os text)
+CREATE OR REPLACE FUNCTION tiger.loader_generate_census_script(param_states text[], os text)
   RETURNS SETOF text AS
 $$
 SELECT tiger.create_census_base_tables();

@@ -1,10 +1,10 @@
 -- Geocode an already parsed address, preferring precise address matches and
 -- falling back to broader location matches when needed.
-CREATE OR REPLACE FUNCTION geocode(
-    IN_ADDY NORM_ADDY,
+CREATE OR REPLACE FUNCTION tiger.geocode(
+    IN_ADDY tiger.norm_addy,
     max_results integer DEFAULT 10,
     restrict_geom @extschema:postgis@.geometry DEFAULT null,
-    OUT ADDY NORM_ADDY,
+    OUT ADDY tiger.norm_addy,
     OUT GEOMOUT @extschema:postgis@.GEOMETRY,
     OUT RATING INTEGER
 ) RETURNS SETOF RECORD
@@ -97,10 +97,10 @@ ROWS 1;
 
 -- Normalize free-form input once, then only delegate to the structured
 -- geocoder overload when parsing succeeds.
-CREATE OR REPLACE FUNCTION geocode(
+CREATE OR REPLACE FUNCTION tiger.geocode(
     input VARCHAR, max_results integer DEFAULT 10,
     restrict_geom @extschema:postgis@.geometry DEFAULT NULL,
-    OUT ADDY NORM_ADDY,
+    OUT ADDY tiger.norm_addy,
     OUT GEOMOUT @extschema:postgis@.GEOMETRY,
     OUT RATING INTEGER
 ) RETURNS SETOF RECORD
