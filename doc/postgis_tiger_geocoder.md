@@ -37,25 +37,25 @@ Refer to the [README](../README.md#loading-data) for instructions how to load da
 
 ### `Geocode`
 
-Takes a US address string (or a pre-normalized `norm_addy`) and returns a set of possible matched locations. Each result includes a point geometry in NAD 83 lon/lat, a normalized address, and a numeric rating. **Lower rating = better match.** Results are sorted best-first.
+Takes a US address string (or a pre-normalized `tiger.norm_addy`) and returns a set of possible matched locations. Each result includes a point geometry in NAD 83 lon/lat, a normalized address, and a numeric rating. **Lower rating = better match.** Results are sorted best-first.
 
 **Synopsis**
 
 ```sql
-setof record geocode(
+setof record tiger.geocode(
     varchar   address,
     integer   max_results    = 10,
     geometry  restrict_region = NULL,
-    norm_addy OUT addy,
+    tiger.norm_addy OUT addy,
     geometry  OUT geomout,
     integer   OUT rating
 );
 
-setof record geocode(
-    norm_addy in_addy,
+setof record tiger.geocode(
+    tiger.norm_addy in_addy,
     integer   max_results    = 10,
     geometry  restrict_region = NULL,
-    norm_addy OUT addy,
+    tiger.norm_addy OUT addy,
     geometry  OUT geomout,
     integer   OUT rating
 );
@@ -66,11 +66,11 @@ setof record geocode(
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `address` | `varchar` | Free-text US address, e.g. `'75 State Street, Boston MA 02109'`. |
-| `in_addy` | `norm_addy` | Already-normalized address (alternative overload). |
+| `in_addy` | `tiger.norm_addy` | Already-normalized address (alternative overload). |
 | `max_results` | `integer` | Maximum candidates to return. Defaults to `10`. Use `1` for batch operations. |
 | `restrict_region` | `geometry` | Optional geometry filter; only addresses within this region are considered. |
 
-**Returns:** `setof record (addy norm_addy, geomout geometry, rating integer)`
+**Returns:** `setof record (addy tiger.norm_addy, geomout geometry, rating integer)`
 
 **Example — single best result**
 
@@ -81,7 +81,7 @@ SELECT g.rating,
        (addy).streetname,
        (addy).location,
        (addy).stateabbrev
-FROM geocode('75 State Street, Boston MA 02109', 1) AS g;
+FROM tiger.geocode('75 State Street, Boston MA 02109', 1) AS g;
 
 -- rating=0 means exact match
 ```
@@ -92,7 +92,7 @@ FROM geocode('75 State Street, Boston MA 02109', 1) AS g;
 UPDATE addresses_to_geocode
 SET (rating, new_address, lon, lat) = (
     COALESCE(g.rating, -1),
-    pprint_addy(g.addy),
+    tiger.pprint_addy(g.addy),
     ST_X(g.geomout)::numeric(8,5),
     ST_Y(g.geomout)::numeric(8,5)
 )
@@ -102,7 +102,7 @@ FROM (
     WHERE rating IS NULL
     ORDER BY addid LIMIT 100
 ) AS a
-LEFT JOIN LATERAL geocode(a.address, 1) AS g ON true
+LEFT JOIN LATERAL tiger.geocode(a.address, 1) AS g ON true
 WHERE a.addid = addresses_to_geocode.addid;
 ```
 
@@ -117,14 +117,14 @@ Geocodes a street intersection given two street names and a state, returning pos
 **Synopsis**
 
 ```sql
-setof record Geocode_Intersection(
+setof record tiger.Geocode_Intersection(
     varchar  roadway1,
     varchar  roadway2,
     varchar  in_state,
     varchar  in_city    = NULL,
     varchar  in_zip     = NULL,
     integer  max_results = 10,
-    norm_addy OUT addy,
+    tiger.norm_addy OUT addy,
     geometry  OUT geomout,
     integer   OUT rating
 );
@@ -141,13 +141,13 @@ setof record Geocode_Intersection(
 | `in_zip` | `varchar` | Optional 5-digit ZIP code to narrow candidates. |
 | `max_results` | `integer` | Maximum candidates. Defaults to `10`. |
 
-**Returns:** `setof record (addy norm_addy, geomout geometry, rating integer)`
+**Returns:** `setof record (addy tiger.norm_addy, geomout geometry, rating integer)`
 
 **Example**
 
 ```sql
-SELECT pprint_addy(addy), ST_AsText(geomout), rating
-FROM Geocode_Intersection(
+SELECT tiger.pprint_addy(addy), ST_AsText(geomout), rating
+FROM tiger.Geocode_Intersection(
     'State St', 'Devonshire St', 'MA',
     'Boston', '02109', 3
 );
@@ -162,11 +162,11 @@ Converts a point geometry into theoretically possible street addresses and nearb
 **Synopsis**
 
 ```sql
-record Reverse_Geocode(
+record tiger.Reverse_Geocode(
     geometry    pt,
     boolean     include_strnum_range = false,
     geometry[]  OUT intpt,
-    norm_addy[] OUT addy,
+    tiger.norm_addy[] OUT addy,
     varchar[]   OUT street
 );
 ```
@@ -178,7 +178,7 @@ record Reverse_Geocode(
 | `pt` | `geometry` | Input point in any known SRID; internally reprojected to Tiger's SRS. Must fall within a region where Tiger data has been loaded. |
 | `include_strnum_range` | `boolean` | When `true`, cross streets include the house-number range (e.g. `'67 – 127 Massachusetts Ave'`). Defaults to `false`. |
 
-**Returns:** `record (intpt geometry[], addy norm_addy[], street varchar[])`
+**Returns:** `record (intpt geometry[], addy tiger.norm_addy[], street varchar[])`
 
 | Output field | Description |
 |---|---|
@@ -189,9 +189,9 @@ record Reverse_Geocode(
 **Example**
 
 ```sql
-SELECT pprint_addy(r.addy[1])              AS address,
+SELECT tiger.pprint_addy(r.addy[1])              AS address,
        array_to_string(r.street, ', ')     AS cross_streets
-FROM reverse_geocode(
+FROM tiger.reverse_geocode(
     ST_GeomFromText('POINT(-71.093902 42.359446)', 4269),
     true
 ) AS r;
@@ -208,12 +208,12 @@ FROM reverse_geocode(
 
 ### `Normalize_Address`
 
-Parses a free-text US street address into a structured `norm_addy` composite type. Works entirely from the lookup tables bundled in the `tiger` schema — no Census data download required.
+Parses a free-text US street address into a structured `tiger.norm_addy` composite type. Works entirely from the lookup tables bundled in the `tiger` schema — no Census data download required.
 
 **Synopsis**
 
 ```sql
-norm_addy normalize_address(varchar in_address);
+tiger.norm_addy tiger.normalize_address(varchar in_address);
 ```
 
 **Parameters**
@@ -222,9 +222,9 @@ norm_addy normalize_address(varchar in_address);
 |-----------|------|-------------|
 | `in_address` | `varchar` | Free-form address string. Abbreviation variants are resolved via `direction_lookup`, `street_type_lookup`, and `state_lookup` tables in the `tiger` schema. |
 
-**Returns:** `norm_addy` composite type
+**Returns:** `tiger.norm_addy` composite type
 
-**`norm_addy` Fields**
+**`tiger.norm_addy` Fields**
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -246,7 +246,7 @@ norm_addy normalize_address(varchar in_address);
 ```sql
 SELECT (g.na).streetname, (g.na).streettypeabbrev, (g.na).location
 FROM (
-    SELECT normalize_address('124 Mount Auburn St, Cambridge, MA 02138') AS na
+    SELECT tiger.normalize_address('124 Mount Auburn St, Cambridge, MA 02138') AS na
 ) g;
 
 -- streetname = 'Mount Auburn', streettypeabbrev = 'St', location = 'Cambridge'
@@ -261,7 +261,7 @@ Drop-in replacement for `Normalize_Address` using the PAGC address standardizer 
 **Synopsis**
 
 ```sql
-norm_addy Pagc_Normalize_Address(varchar in_address);
+tiger.norm_addy tiger.Pagc_Normalize_Address(varchar in_address);
 ```
 
 **Parameters**
@@ -270,7 +270,7 @@ norm_addy Pagc_Normalize_Address(varchar in_address);
 |-----------|------|-------------|
 | `in_address` | `varchar` | Free-form address string. Parsed using `tiger.pagc_rules`, `tiger.pagc_gaz`, and `tiger.pagc_lex` tables, which can be customized for non-US data. |
 
-**Returns:** `norm_addy` composite type (identical structure to `Normalize_Address`)
+**Returns:** `tiger.norm_addy` composite type (identical structure to `Normalize_Address`)
 
 > Requires `CREATE EXTENSION address_standardizer` before use. The PAGC engine handles international address formats and alphanumeric house numbers better than the built-in normalizer. Available since PostGIS 2.1.
 
@@ -278,23 +278,23 @@ norm_addy Pagc_Normalize_Address(varchar in_address);
 
 ### `Pprint_Addy`
 
-Formats a `norm_addy` composite back into a human-readable address string.
+Formats a `tiger.norm_addy` composite back into a human-readable address string.
 
 **Synopsis**
 
 ```sql
-varchar Pprint_Addy(norm_addy in_addy);
+varchar tiger.Pprint_Addy(tiger.norm_addy in_addy);
 ```
 
 **Example**
 
 ```sql
-SELECT pprint_addy(normalize_address('529 Main Street, Boston MA, 02129'));
+SELECT tiger.pprint_addy(tiger.normalize_address('529 Main Street, Boston MA, 02129'));
 -- → '529 Main St, Boston, MA 02129'
 
 -- Commonly used to display geocoded results:
-SELECT pprint_addy(addy) AS matched_address
-FROM geocode('77 Massachusetts Avenue, Cambridge, MA', 1);
+SELECT tiger.pprint_addy(addy) AS matched_address
+FROM tiger.geocode('77 Massachusetts Avenue, Cambridge, MA', 1);
 ```
 
 ---
@@ -308,16 +308,16 @@ Retrieves the current value of a named setting from the `tiger.geocode_settings`
 **Synopsis**
 
 ```sql
-text Get_Geocode_Setting(varchar setting_name);
+text tiger.Get_Geocode_Setting(varchar setting_name);
 ```
 
 **Example**
 
 ```sql
-SELECT Get_Geocode_Setting('debug_geocode_address');
+SELECT tiger.Get_Geocode_Setting('debug_geocode_address');
 -- → 'false'
 
-SELECT Get_Geocode_Setting('use_pagc_address_parser');
+SELECT tiger.Get_Geocode_Setting('use_pagc_address_parser');
 -- → 'false'
 ```
 
@@ -330,7 +330,7 @@ Writes a value into the `tiger.geocode_settings` table to control geocoder behav
 **Synopsis**
 
 ```sql
-text Set_Geocode_Setting(varchar setting_name, varchar setting_value);
+text tiger.Set_Geocode_Setting(varchar setting_name, varchar setting_value);
 ```
 
 **Common Settings**
@@ -346,7 +346,7 @@ text Set_Geocode_Setting(varchar setting_name, varchar setting_value);
 **Example**
 
 ```sql
-SELECT Set_Geocode_Setting('debug_geocode_address', 'true');
+SELECT tiger.Set_Geocode_Setting('debug_geocode_address', 'true');
 ```
 
 ---
@@ -358,7 +358,7 @@ Returns the census tract (or any other column from the Tiger tract table) that s
 **Synopsis**
 
 ```sql
-varchar Get_Tract(
+varchar tiger.Get_Tract(
     geometry the_point,
     varchar  output_field = 'name'
 );
@@ -374,7 +374,7 @@ varchar Get_Tract(
 **Example**
 
 ```sql
-SELECT Get_Tract(
+SELECT tiger.Get_Tract(
     ST_GeomFromText('POINT(-71.1066 42.3554)', 4269),
     'tract_id'
 );
@@ -392,7 +392,7 @@ Generates a platform-specific shell script that downloads Tiger/Line data for th
 **Synopsis**
 
 ```sql
-setof varchar Loader_Generate_Script(
+setof varchar tiger.Loader_Generate_Script(
     varchar[] param_states,
     varchar   os
 );
@@ -411,7 +411,7 @@ setof varchar Loader_Generate_Script(
 
 ```sql
 -- Generate load script for Massachusetts, save to file, and run
-SELECT loader_generate_script(ARRAY['MA'], 'sh') AS script \gset
+SELECT tiger.loader_generate_script(ARRAY['MA'], 'sh') AS script \gset
 -- Copy the output to a .sh file, chmod +x, and run as the postgres OS user
 ```
 
@@ -426,7 +426,7 @@ Generates a shell script that downloads and loads the **nationwide** county and 
 **Synopsis**
 
 ```sql
-varchar Loader_Generate_Nation_Script(varchar os);
+varchar tiger.Loader_Generate_Nation_Script(varchar os);
 ```
 
 **Parameters**
@@ -438,7 +438,7 @@ varchar Loader_Generate_Nation_Script(varchar os);
 **Example**
 
 ```sql
-SELECT Loader_Generate_Nation_Script('sh');
+SELECT tiger.Loader_Generate_Nation_Script('sh');
 -- Save output to nation_load.sh, then run it
 ```
 
@@ -453,7 +453,7 @@ Generates a shell script that downloads only census tract, block group, and tabu
 **Synopsis**
 
 ```sql
-setof varchar Loader_Generate_Census_Script(
+setof varchar tiger.Loader_Generate_Census_Script(
     varchar[] param_states,
     varchar   os
 );
@@ -479,13 +479,13 @@ Identifies all Tiger tables that are missing indexes on columns used in geocoder
 **Synopsis**
 
 ```sql
-void Install_Missing_Indexes();
+void tiger.Install_Missing_Indexes();
 ```
 
 **Example**
 
 ```sql
-SELECT Install_Missing_Indexes();
+SELECT tiger.Install_Missing_Indexes();
 -- No output if all required indexes already exist.
 ```
 
@@ -498,13 +498,13 @@ Like `Install_Missing_Indexes`, but returns the DDL `CREATE INDEX` statements as
 **Synopsis**
 
 ```sql
-text Missing_Indexes_Generate_Script();
+text tiger.Missing_Indexes_Generate_Script();
 ```
 
 **Example**
 
 ```sql
-SELECT Missing_Indexes_Generate_Script();
+SELECT tiger.Missing_Indexes_Generate_Script();
 -- Returns CREATE INDEX ... statements; review and execute manually.
 ```
 
@@ -517,7 +517,7 @@ Generates SQL to drop all non-primary-key, non-unique indexes on the `tiger` sch
 **Synopsis**
 
 ```sql
-text Drop_Indexes_Generate_Script(varchar schema_name = 'tiger_data');
+text tiger.Drop_Indexes_Generate_Script(varchar schema_name = 'tiger_data');
 ```
 
 **Parameters**
@@ -529,7 +529,7 @@ text Drop_Indexes_Generate_Script(varchar schema_name = 'tiger_data');
 **Example**
 
 ```sql
-SELECT Drop_Indexes_Generate_Script('tiger_data');
+SELECT tiger.Drop_Indexes_Generate_Script('tiger_data');
 -- Returns DROP INDEX statements; execute before reloading data.
 ```
 
@@ -542,13 +542,13 @@ Generates SQL to drop all nationwide lookup tables in the specified schema — t
 **Synopsis**
 
 ```sql
-text Drop_Nation_Tables_Generate_Script(varchar schema_name = 'tiger_data');
+text tiger.Drop_Nation_Tables_Generate_Script(varchar schema_name = 'tiger_data');
 ```
 
 **Example**
 
 ```sql
-SELECT Drop_Nation_Tables_Generate_Script('tiger_data');
+SELECT tiger.Drop_Nation_Tables_Generate_Script('tiger_data');
 ```
 
 ---
@@ -560,7 +560,7 @@ Generates SQL to drop all tables in the given schema prefixed with a specific US
 **Synopsis**
 
 ```sql
-text Drop_State_Tables_Generate_Script(
+text tiger.Drop_State_Tables_Generate_Script(
     varchar state_code,
     varchar schema_name = 'tiger_data'
 );
@@ -576,7 +576,7 @@ text Drop_State_Tables_Generate_Script(
 **Example**
 
 ```sql
-SELECT Drop_State_Tables_Generate_Script('MA');
+SELECT tiger.Drop_State_Tables_Generate_Script('MA');
 -- Outputs DROP TABLE statements for ma_addr, ma_edges, ma_faces, ma_place, etc.
 ```
 
@@ -591,7 +591,7 @@ Loads Tiger road and face data for a defined bounding region into an existing Po
 **Synopsis**
 
 ```sql
-varchar Topology_Load_Tiger(
+varchar tiger.Topology_Load_Tiger(
     varchar topo_name,
     varchar region_by,
     varchar region_filter
@@ -615,6 +615,6 @@ varchar Topology_Load_Tiger(
 SELECT CreateTopology('boston_topo', 26986);
 
 -- 2. Load Tiger data for the City of Boston
-SELECT Topology_Load_Tiger('boston_topo', 'place', 'Boston');
+SELECT tiger.Topology_Load_Tiger('boston_topo', 'place', 'Boston');
 -- → 'Loaded 1234 nodes, 4567 edges, 890 faces'
 ```

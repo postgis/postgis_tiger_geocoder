@@ -93,7 +93,7 @@ To confirm your install is working correctly, run this sql in your database:
 
 ```sql
 SELECT na.address, na.streetname,na.streettypeabbrev, na.zip
-	FROM normalize_address('1 Devonshire Place, Boston, MA 02109') AS na;
+	FROM tiger.normalize_address('1 Devonshire Place, Boston, MA 02109') AS na;
 ```
 
 will output:
@@ -135,13 +135,13 @@ Note even if you want just specific states you need to
 do this step since 2011 county, state tables are available only at national level
 
 ```sql
-SELECT loader_generate_nation_script('windows');
+SELECT tiger.loader_generate_nation_script('windows');
 ```
 
 This you do after the nation load and for states you want:
 
 ```sql
-SELECT loader_generate_script(ARRAY['DC','RI'], 'windows');
+SELECT tiger.loader_generate_script(ARRAY['DC','RI'], 'windows');
 ```
 
 If your script disappears without loading anything,
@@ -211,12 +211,12 @@ exist.
 
     If you want to dump directly to file, use PSQL
     ```bash
-    psql -c "SELECT Loader_Generate_Nation_Script('debbie')" -h localhost -d geocoder -tA > /gisdata/nation_script_load.sh
+    psql -c "SELECT tiger.loader_generate_nation_script('debbie')" -h localhost -d geocoder -tA > /gisdata/nation_script_load.sh
     ```
 
     or alternatively just copy and paste the commands from SQL output
     ```sql
-    SELECT Loader_Generate_Nation_Script('debbie');
+    SELECT tiger.loader_generate_nation_script('debbie');
     ```
 
 
@@ -263,7 +263,7 @@ exist.
 8. Next load states:
 
     ```sql
-    psql -c "SELECT Loader_Generate_Script(ARRAY['DC','MA'], 'debbie')" -d geocoder -tA > /gisdata/dc_ma_load.sh
+    psql -c "SELECT tiger.loader_generate_script(ARRAY['DC','MA'], 'debbie')" -d geocoder -tA > /gisdata/dc_ma_load.sh
     ```
 9. Next run the script to install any missing indexes and vacuum and analyze
 
@@ -271,12 +271,12 @@ exist.
     you create them run the below and manually run the steps generated if you prefer:
 
     ```sql
-    SELECT missing_indexes_generate_script();
+    SELECT tiger.missing_indexes_generate_script();
     ```
 
     This will actually execute the create index steps without showing
     ```sql
-    SELECT install_missing_indexes();
+    SELECT tiger.install_missing_indexes();
     ```
 
     Then analyze your tables so stats are up to date
@@ -307,7 +307,7 @@ exist.
     SELECT g.rating,
         ST_X(geomout) As lon,
         ST_Y(geomout) As lat, (addy).*
-    FROM geocode('1731 New Hampshire Avenue Northwest, Washington, DC 20010', 1) As g;
+    FROM tiger.geocode('1731 New Hampshire Avenue Northwest, Washington, DC 20010', 1) As g;
     ```
 
     To get multiple answers if there is more than 1:
@@ -316,7 +316,7 @@ exist.
     SELECT g.rating,
         ST_X(geomout) As lon,
         ST_Y(geomout) As lat, (addy).*
-    FROM geocode('1731 New Hampshire Avenue Northwest, Washington, DC 20010') As g;
+    FROM tiger.geocode('1731 New Hampshire Avenue Northwest, Washington, DC 20010') As g;
     ```
 
 ## CI Status
