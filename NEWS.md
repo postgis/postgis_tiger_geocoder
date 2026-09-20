@@ -7,6 +7,10 @@ This version requires PostgreSQL 16 and above
 - [GT-30](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues/30) Move from inherited model to partitioned model (Regina Obe)
 - [GT-56](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/issues/56) Schema qualify all references to tiger schema (Regina Obe)
 
+## Bug Fixes and Enhancements
+
+- [GT-58](https://gitea.osgeo.org/postgis/postgis_tiger_geocoder/pulls/58) Make least_hn, greatest_hn, and diff_zip inlinable (Tag Spilman)
+
 # 2025.2
 2026/08/23
 This version requires PostgreSQL 16 and above
