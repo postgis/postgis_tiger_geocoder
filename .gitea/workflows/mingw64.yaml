@@ -1,0 +1,11 @@
+name: MinGW64 Build
+on: [push, pull]
+jobs:
+  compile:
+    runs-on: windows-mingw64
+    steps:
+      - name: Run MinGW64 Script
+        shell: bash
+        run: |
+          echo "Check gcc version"
+          gcc --version
