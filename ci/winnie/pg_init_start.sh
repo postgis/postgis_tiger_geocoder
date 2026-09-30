@@ -33,6 +33,6 @@ $PGPATHEDB/bin/initdb -E UTF8 -U postgres -A trust
 echo -n "Starting PostgreSQL: "
 $DAEMON &
 #sleep a bit because sometimes postgres takes a bit to start up
-sleep 10
+sleep 50
 echo "ok"
 exit 0

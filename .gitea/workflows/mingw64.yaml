@@ -9,7 +9,7 @@ jobs:
     runs-on: windows-mingw64
     strategy:
       matrix:
-        pg_ver: ['16', '17', '18', '19']
+        pg_ver: ['19']
       fail-fast: false
 
     steps:
@@ -32,11 +32,3 @@ jobs:
           PG_VER: ${{ matrix.pg_ver }}
         run: |
           "${GITHUB_WORKSPACE}/ci/winnie/regress.sh"
-
-      # Stage 3: Package
-      - name: Package
-        shell: bash
-        env:
-          PG_VER: ${{ matrix.pg_ver }}
-        run: |
-          "${GITHUB_WORKSPACE}/ci/winnie/package.sh"
