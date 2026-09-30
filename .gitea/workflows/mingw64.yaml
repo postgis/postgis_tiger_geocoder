@@ -7,8 +7,8 @@ name: Winnie PostGIS Test Matrix
 on: [push]
 
 jobs:
-  test-matrix:
-    runs-on: winnie
+  pg-matrix:
+    runs-on: windows-mingw64
     strategy:
       matrix:
         pg_ver: ['16', '17', '18', '19']
