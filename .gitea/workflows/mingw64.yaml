@@ -1,11 +1,44 @@
 name: MinGW64 Build
 on: [push, pull]
+
+env:
+  OS_BUILD: "64"
+name: Winnie PostGIS Test Matrix
+on: [push]
+
 jobs:
-  compile:
-    runs-on: windows-mingw64
+  test-matrix:
+    runs-on: winnie
+    strategy:
+      matrix:
+        pg_ver: ['16', '17', '18', '19']
+      fail-fast: false
+
     steps:
-      - name: Run MinGW64 Script
+      # Step 0: Check out the repository source code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Stage 1: PG Start
+      - name: PG Start
         shell: bash
+        env:
+          PG_VER: ${{ matrix.pg_ver }}
         run: |
-          echo "Check gcc version"
-          gcc --version
+          "${GITHUB_WORKSPACE}/ci/winnie/pg_init_start.sh"
+
+      # Stage 2: Test
+      - name: Test
+        shell: bash
+        env:
+          PG_VER: ${{ matrix.pg_ver }}
+        run: |
+          "${GITHUB_WORKSPACE}/ci/winnie/regress.sh"
+
+      # Stage 3: Package
+      - name: Package
+        shell: bash
+        env:
+          PG_VER: ${{ matrix.pg_ver }}
+        run: |
+          "${GITHUB_WORKSPACE}/ci/winnie/package.sh"
