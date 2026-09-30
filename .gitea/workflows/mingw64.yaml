@@ -3,8 +3,6 @@ on: [push, pull]
 
 env:
   OS_BUILD: "64"
-name: Winnie PostGIS Test Matrix
-on: [push]
 
 jobs:
   pg-matrix:
