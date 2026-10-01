@@ -3,6 +3,7 @@ on: [push, pull]
 
 env:
   OS_BUILD: "64"
+  WORKSPACE: ${{ github.workspace }}
 
 jobs:
   pg-matrix:
