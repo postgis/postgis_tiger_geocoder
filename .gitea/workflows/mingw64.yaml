@@ -8,6 +8,9 @@ env:
 jobs:
   pg-matrix:
     runs-on: windows-mingw64
+    defaults:
+      run:
+        shell: "C:\\ming64\\msys\\usr\\bin\\bash.exe --noprofile --norc -e -o pipefail {0}"
     strategy:
       matrix:
         pg_ver: ['18']
@@ -20,16 +23,15 @@ jobs:
 
       # Stage 1: PG Start
       - name: PG Start
-        shell: C:\ming64\msys\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
         env:
           PG_VER: ${{ matrix.pg_ver }}
         run: |
-          "${GITHUB_WORKSPACE}/ci/winnie/pg_init_start.sh"
+          "${WORKSPACE}/ci/winnie/pg_init_start.sh"
 
       # Stage 2: Test
       - name: Test
-        shell: C:\ming64\msys\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
+        shell: bat
         env:
           PG_VER: ${{ matrix.pg_ver }}
         run: |
-          "${GITHUB_WORKSPACE}/ci/winnie/regress.sh"
+          "${WORKSPACE}/ci/winnie/regress.sh"
