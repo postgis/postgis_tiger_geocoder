@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-mingw64
     defaults:
       run:
-        shell: bash --noprofile --norc -e -o pipefail {0}
+        shell: C:/ming64/msys/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
     strategy:
       matrix:
         pg_ver: ['18']
