@@ -20,7 +20,7 @@ jobs:
 
       # Stage 1: PG Start
       - name: PG Start
-        shell: bash --noprofile --norc -e -o pipefail {0}
+        shell: C:\ming64\msys\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
         env:
           PG_VER: ${{ matrix.pg_ver }}
         run: |
@@ -28,7 +28,7 @@ jobs:
 
       # Stage 2: Test
       - name: Test
-        shell: bash --noprofile --norc -e -o pipefail {0}
+        shell: C:\ming64\msys\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
         env:
           PG_VER: ${{ matrix.pg_ver }}
         run: |
