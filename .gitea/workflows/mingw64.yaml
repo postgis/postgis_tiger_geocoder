@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-mingw64
     strategy:
       matrix:
-        pg_ver: ['19']
+        pg_ver: ['18']
       fail-fast: false
 
     steps:
