@@ -27,9 +27,9 @@ BEGIN
   SELECT *
     INTO sa
   FROM standardize_address(
-      'pagc_lex',
-      'pagc_gaz',
-      'pagc_rules',
+      'tiger.pagc_lex',
+      'tiger.pagc_gaz',
+      'tiger.pagc_rules',
       raw_input
   ) AS sa;
 
